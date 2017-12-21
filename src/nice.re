@@ -199,11 +199,11 @@ let string_of_transform = (transform) =>
   | ScaleY(float) => "scaleY(" ++ string_of_float(float) ++ ")"
   | ScaleZ(float) => "scaleZ(" ++ string_of_float(float) ++ ")"
   | Translate(x, y) => "translate(" ++ string_of_float(x) ++ ", " ++ string_of_float(y) ++ ")"
-  | TranslateX(float) => "translateX(" ++ string_of_float(float)
-  | TranslateY(float) => "translateY(" ++ string_of_float(float)
-  | TranslateZ(float) => "translateZ(" ++ string_of_float(float)
-  | SkewX(angle) => "skewX(" ++ string_of_angle(angle)
-  | SkewY(angle) => "skewY(" ++ string_of_angle(angle)
+  | TranslateX(float) => "translateX(" ++ string_of_float(float) ++ ")"
+  | TranslateY(float) => "translateY(" ++ string_of_float(float) ++ ")"
+  | TranslateZ(float) => "translateZ(" ++ string_of_float(float) ++ ")"
+  | SkewX(angle) => "skewX(" ++ string_of_angle(angle) ++ ")"
+  | SkewY(angle) => "skewY(" ++ string_of_angle(angle) ++ ")"
   };
 
 type color =
@@ -779,13 +779,14 @@ type style =
   | TintColor(color)
   | OverlayColor(color)
   /* at rules */
-  | MediaQuery(string, style)
-  | Supports(string, style)
-  | Select(string, style)
+  | MediaQuery(string, ruleset)
+  | Supports(string, ruleset)
+  | Select(string, ruleset)
   /* escape hatch */
-  | Raw(string, string);
+  | Raw(string, string)
+and ruleset = list(style);
 
-let rec string_of_style = (style) =>
+let string_of_style = (style) =>
   switch style {
   | Display(display) => "display: " ++ string_of_display(display)
   | Width(dimension) => "width: " ++ string_of_dimension(dimension)
@@ -886,38 +887,32 @@ let rec string_of_style = (style) =>
   | TintColor(color) => "tintcolor: " ++ string_of_color(color)
   | OverlayColor(color) => "overlay-color" ++ string_of_color(color)
   /* at rules */
-  /* | MediaQuery(query, style) => "@media " ++ query ++ "{" ++ string_of_style(style) ++ "}" */
-  /* | Supports(string, style) => "@supports " ++ string ++ "{" ++ string_of_style(style) ++ "}" */
+  /* | MediaQuery(query, ruleset) => "@media " ++ query ++ "{" ++ string_of_ruleset(ruleset) ++ "}" */
+  /* | Supports(string, ruleset) => "@supports " ++ string ++ "{" ++ string_of_ruleset(ruleset) ++ "}" */
   /* | Select(string, style) */
   /* escape hatch */
   | Raw(key, value) => key ++ ": " ++ value
   | _ => "not implemented"
   };
 
-let insertRule: string => int = [%bs.raw
+/* todo - something better */
+let insertRule: string => unit = [%bs.raw
   {|  function(rule){
-        document.querySelector('[data-glam]')
-          .appendChild(
-            document.createTextNode(rule)
-          )
+        let tag = document.querySelector('[data-glam]');
+        if(!tag){
+          tag = document.createElement('style');
+          tag.setAttribute('data-glam', '');
+          document.head.appendChild(tag);
+        }
+        tag.appendChild(document.createTextNode(rule));
       }
   |}
 ];
 
-/* type sheet = {. insert: string => int};
-
-   let sheet = {pub insert = (css) => insertRule(css)}; */
+/* let groupByType = decls => */
 let css = (decls) => {
   let className = "css-" ++ string_of_int(Hashtbl.hash(decls)); /* todo - base 62 or something */
   let css = String.concat("; ", List.map((decl) => string_of_style(decl), decls));
   insertRule("." ++ className ++ "{" ++ css ++ "}");
   className
 };
-
-/*
- generate css
- generate classname
-    */
-let parse = (decls) => {};
-
-let flatten = (decls) => {};
