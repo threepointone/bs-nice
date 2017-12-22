@@ -897,19 +897,17 @@ let string_of_style = (style) =>
 
 /* todo - something better */
 let insertRule: string => unit = [%bs.raw
-  {|  function(rule){
-        let tag = document.querySelector('[data-glam]');
-        if(!tag){
-          tag = document.createElement('style');
-          tag.setAttribute('data-glam', '');
-          document.head.appendChild(tag);
-        }
-        tag.appendChild(document.createTextNode(rule));
+  {|function(rule){
+      let tag = document.querySelector('[data-glam]');
+      if(!tag){
+        tag = document.createElement('style');
+        tag.setAttribute('data-glam', '');
+        document.head.appendChild(tag);
       }
-  |}
+      tag.appendChild(document.createTextNode(rule));
+    }|}
 ];
 
-/* let groupByType = decls => */
 let css = (decls) => {
   let className = "css-" ++ string_of_int(Hashtbl.hash(decls)); /* todo - base 62 or something */
   let css = String.concat("; ", List.map((decl) => string_of_style(decl), decls));
