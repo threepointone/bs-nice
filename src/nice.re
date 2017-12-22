@@ -1,12 +1,14 @@
 type position =
   | Absolute
   | Relative
+  | Sticky
   | Fixed;
 
 let string_of_position = (position) =>
   switch position {
   | Absolute => "absolute"
   | Relative => "relative"
+  | Sticky => "sticky"
   | Fixed => "fixed"
   };
 
@@ -15,8 +17,6 @@ type flexDirection =
   | RowReverse
   | Column
   | ColumnReverse;
-
-let flexDirection = 123;
 
 let string_of_flexDirection = (direction) =>
   switch direction {
