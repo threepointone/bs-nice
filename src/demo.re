@@ -24,3 +24,5 @@ let className =
   ]);
 
 Js.log(className);
+
+global("html, body", [Display(Block), Color(Green)]);

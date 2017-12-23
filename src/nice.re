@@ -961,12 +961,7 @@ let string_of_scope = (scope: scope, hash: string, content: string) => {
     prefix := prefix^ ++ "@supports " ++ String.concat(" and ", scope.supps) ++ "{"
   };
   if (List.length(scope.selectors) > 0) {
-    prefix :=
-      prefix^
-      ++ replace(
-           List.fold_left(join_selectors, "", scope.selectors),
-           hash === "" ? "" : "." ++ hash
-         )
+    prefix := prefix^ ++ replace(List.fold_left(join_selectors, "", scope.selectors), hash)
   };
   prefix := prefix^ ++ "{";
   suffix := suffix^ ++ "}";
@@ -1048,38 +1043,41 @@ let base62_of_int: int => string = [%bs.raw
   |}
 ];
 
-let css = (decls) => {
-  let flattened = flatten(decls);
-  let className = "css-" ++ base62_of_int(Hashtbl.hash(flattened));
-  if (Hashtbl.mem(injected, flattened) === false) {
+let insert = (nodes: list(atom), hash: string) =>
+  if (Hashtbl.mem(injected, nodes) === false) {
     let cssRules =
-      flattened
+      nodes
       |> List.filter(((_scope, styles)) => styles !== [])
       |> List.map(
            ((scope, styles)) =>
-             string_of_scope(
-               scope,
-               className,
-               String.concat(";", List.map(string_of_style, styles))
-             )
+             string_of_scope(scope, hash, String.concat(";", List.map(string_of_style, styles)))
          );
     List.map(insertRule, cssRules) |> ignore;
-    Hashtbl.add(injected, flattened, true)
+    Hashtbl.add(injected, nodes, true)
   };
+
+let css = (decls) => {
+  let flattened = flatten(decls);
+  let className = "css-" ++ base62_of_int(Hashtbl.hash(flattened));
+  insert(flattened, "." ++ className);
   className
 };
 
-let global = (decls) => {};
+let global = (select, decls) => {
+  let flattened = flatten(decls);
+  insert(flattened, select);
+  ()
+};
 
-let keyframes = (steps) => {};
+let keyframes = (_steps) => ();
 
-let animation = (decls) => {};
+let animation = (_decls) => ();
 
-let fontFace = (decls) => {};
+let fontFace = (_decls) => ();
 
-let rehydrate = (ids) => {};
+let rehydrate = (_ids) => ();
 
-let extract = (_html: string) : list(string) => [];
+let extract: string => list(string) = (_html) => [];
 
 module Presets = {
   let mobile = "(min-width:400px)";
