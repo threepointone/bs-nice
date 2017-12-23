@@ -988,14 +988,11 @@ let base62_of_int: int => string = [%bs.raw
     function (number) {
       number = number * Math.sign(number);
       var symbols = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-
       var conversion = '';
-
       while (number >= 1) {
         conversion = symbols[number - 62 * Math.floor(number / 62)] + conversion;
         number = Math.floor(number / 62);
       }
-
       return conversion;
     }
   |}
