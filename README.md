@@ -22,10 +22,10 @@ let className = css([
 * pure reason
 * typed css
 * glamor style composition
+* escape hatch - `Raw(key, value)`
 
 ## todo
 
-* global rules
 * keyframes / animations
 * vendor prefixing
 * ~ hot reloading
