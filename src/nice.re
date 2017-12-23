@@ -968,10 +968,10 @@ let injected = Hashtbl.create(100);
 /* todo - server/native */
 let insertRule: string => unit = [%bs.raw
   {|function(rule){
-      var tag = document.querySelector('[data-glam]');
+      var tag = document.querySelector('style[data-nice]');
       if(!tag){
         tag = document.createElement('style');
-        tag.setAttribute('data-glam', '');
+        tag.setAttribute('data-nice', '');
         document.head.appendChild(tag);
       }
       if(process.env.NODE_ENV === 'production'){
