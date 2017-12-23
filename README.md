@@ -28,7 +28,6 @@ let className = css([
 * contextual selectors
 * global rules
 * keyframes / animations
-* insertRule
 * vendor prefixing
-* hot reloading
+* ~ hot reloading
 * 'server' side

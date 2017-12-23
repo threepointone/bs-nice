@@ -898,19 +898,6 @@ let string_of_style = (style) =>
   | _ => raise(Not_found)
   };
 
-/* todo - something better */
-let insertRule: string => unit = [%bs.raw
-  {|function(rule){
-      var tag = document.querySelector('[data-glam]');
-      if(!tag){
-        tag = document.createElement('style');
-        tag.setAttribute('data-glam', '');
-        document.head.appendChild(tag);
-      }
-      tag.appendChild(document.createTextNode(rule));
-    }|}
-];
-
 type scope = {
   mqs: list(string),
   supps: list(string),
@@ -978,6 +965,24 @@ let flatten = (decls) => group(walk(decls, blankScope));
 
 let injected = Hashtbl.create(100);
 
+/* todo - server/node  */
+/* todo - server/native */
+let insertRule: string => unit = [%bs.raw
+  {|function(rule){
+      var tag = document.querySelector('[data-glam]');
+      if(!tag){
+        tag = document.createElement('style');
+        tag.setAttribute('data-glam', '');
+        document.head.appendChild(tag);
+      }
+      if(process.env.NODE_ENV === 'production'){
+        tag.sheet.insertRule(rule, tag.sheet.cssRules.length);
+      } else {
+        tag.appendChild(document.createTextNode(rule));
+      }
+    }|}
+];
+
 let css = (decls) => {
   let flattened = flatten(decls);
   let className =
@@ -986,15 +991,31 @@ let css = (decls) => {
     let cssRules =
       List.map(
         ((scope, styles)) =>
-          string_of_scope(
-            scope,
-            className,
-            String.concat(";", List.map((decl) => string_of_style(decl), styles))
-          ),
+          string_of_scope(scope, className, String.concat(";", List.map(string_of_style, styles))),
         flattened
       );
     List.map(insertRule, cssRules) |> ignore;
     Hashtbl.add(injected, flattened, true)
   };
   className
+};
+
+let global = (decls) => {};
+
+let keyframes = (steps) => {};
+
+let animation = (decls) => {};
+
+let fontFace = (decls) => {};
+
+let rehydrate = (ids) => {};
+
+let extract = (html: string) : list(string) => [];
+
+module Presets = {
+  let mobile = "(min-width: 400px)";
+  let phablet = "(min-width: 550px)";
+  let tablet = "(min-width: 750px)";
+  let desktop = "(min-width: 1000px)";
+  let hd = "(min-width: 1200px)";
 };
