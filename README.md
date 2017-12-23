@@ -25,11 +25,9 @@ let className = css([
 
 ## todo
 
-* contextual selectors
 * global rules
 * keyframes / animations
 * vendor prefixing
 * ~ hot reloading
 * 'server' side
 * benchmarks / tests
-

@@ -15,7 +15,8 @@ let className =
             Color(Orange),
             FontWeight(Bold),
             Overflow(Hidden),
-            Supports("(display: flex)", [Color(Blue)])
+            Supports("(display: flex)", [Color(Blue)]),
+            Select(":hover", [Color(Red), Display(Block), Select(".ie6 &", [Color(Blue)])])
           ]
         )
       ]

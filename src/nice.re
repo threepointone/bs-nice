@@ -897,6 +897,52 @@ let string_of_style = (style) =>
   | _ => raise(Not_found)
   };
 
+/* todo - rewrite in pure reason */
+let splitSelector: string => array(string) = [%bs.raw
+  {|
+    function(selector) {
+      if(selector.indexOf(',') === -1) {
+        return [selector]
+      }
+
+      var indices = [], res = [], inParen = 0, o
+      /*eslint-disable no-cond-assign*/
+      while (o = selectorTokenizer.exec(selector)) {
+      /*eslint-enable no-cond-assign*/
+        switch (o[0]) {
+        case '(': inParen++; break
+        case ')': inParen--; break
+        case ',': if (inParen) break; indices.push(o.index)
+        }
+      }
+      for (o = indices.length; o--;){
+        res.unshift(selector.slice(indices[o] + 1))
+        selector = selector.slice(0, indices[o])
+      }
+      res.unshift(selector)
+      return res
+    }
+    |}
+];
+
+let replace: (string, string) => string = [%bs.raw
+  {|
+  function(src, _with){
+    return src.replace(/\&/g, _with);
+  }
+  |}
+];
+
+let join_selectors = (a, b) => {
+  let ax =
+    splitSelector(a) |> Array.map((a) => String.contains(a, '&') ? a : "&" ++ a) |> Array.to_list;
+  let bx =
+    splitSelector(b) |> Array.map((b) => String.contains(b, '&') ? b : "&" ++ b) |> Array.to_list;
+  bx
+  |> List.fold_left((arr, b) => List.concat([arr, ax |> List.map((a) => replace(b, a))]), [])
+  |> String.concat(",")
+};
+
 type scope = {
   mqs: list(string),
   supps: list(string),
@@ -914,16 +960,20 @@ let string_of_scope = (scope: scope, hash: string, content: string) => {
     suffix := suffix^ ++ "}";
     prefix := prefix^ ++ "@supports " ++ String.concat(" and ", scope.supps) ++ "{"
   };
-  prefix := prefix^ ++ "." ++ hash;
   if (List.length(scope.selectors) > 0) {
-    prefix := prefix^ ++ String.concat("", scope.selectors)
+    prefix :=
+      prefix^
+      ++ replace(
+           List.fold_left(join_selectors, "", scope.selectors),
+           hash === "" ? "" : "." ++ hash
+         )
   };
   prefix := prefix^ ++ "{";
   suffix := suffix^ ++ "}";
   prefix^ ++ content ++ suffix^
 };
 
-let blankScope = {mqs: [], supps: [], selectors: []};
+let blankScope = {mqs: [], supps: [], selectors: ["&"]};
 
 let rec walk = (decls, scope) =>
   List.fold_left(
@@ -1003,11 +1053,16 @@ let css = (decls) => {
   let className = "css-" ++ base62_of_int(Hashtbl.hash(flattened));
   if (Hashtbl.mem(injected, flattened) === false) {
     let cssRules =
-      List.map(
-        ((scope, styles)) =>
-          string_of_scope(scope, className, String.concat(";", List.map(string_of_style, styles))),
-        flattened
-      );
+      flattened
+      |> List.filter(((_scope, styles)) => styles !== [])
+      |> List.map(
+           ((scope, styles)) =>
+             string_of_scope(
+               scope,
+               className,
+               String.concat(";", List.map(string_of_style, styles))
+             )
+         );
     List.map(insertRule, cssRules) |> ignore;
     Hashtbl.add(injected, flattened, true)
   };
@@ -1024,7 +1079,7 @@ let fontFace = (decls) => {};
 
 let rehydrate = (ids) => {};
 
-let extract = (html: string) : list(string) => [];
+let extract = (_html: string) : list(string) => [];
 
 module Presets = {
   let mobile = "(min-width:400px)";
