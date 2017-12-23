@@ -356,7 +356,7 @@ type color =
   | White
   | Whitesmoke
   | Yellow
-  | Yellowreen;
+  | Yellowgreen;
 
 let string_of_color = (color) =>
   switch color {
@@ -523,7 +523,7 @@ let string_of_color = (color) =>
   | White => "white"
   | Whitesmoke => "whitesmoke"
   | Yellow => "yellow"
-  | Yellowreen => "yellowreen"
+  | Yellowgreen => "yellowgreen"
   };
 
 type fontWeight =
