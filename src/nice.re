@@ -898,7 +898,7 @@ let string_of_style = (style) =>
   /* | Select(string, style) */
   /* escape hatch */
   | Raw(key, value) => key ++ ": " ++ value
-  | _ => "not implemented"
+  | _ => raise(Not_found)
   };
 
 /* todo - something better */
