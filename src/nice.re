@@ -901,7 +901,7 @@ let string_of_style = (style) =>
 /* todo - something better */
 let insertRule: string => unit = [%bs.raw
   {|function(rule){
-      let tag = document.querySelector('[data-glam]');
+      var tag = document.querySelector('[data-glam]');
       if(!tag){
         tag = document.createElement('style');
         tag.setAttribute('data-glam', '');
@@ -965,7 +965,7 @@ let group = (normalized: list((scope, style))) : list(atom) => {
   let (rest, scope, styles) =
     List.fold_left(
       ((rest: list(atom), lastScope: scope, styles: ruleset), (scope: scope, style: style)) =>
-        lastScope == scope ?
+        lastScope === scope ?
           (rest, scope, List.concat([styles, [style]])) :
           (List.concat([rest, [(lastScope, styles)]]), scope, [style]),
       ([], blankScope, []: ruleset),
@@ -976,20 +976,25 @@ let group = (normalized: list((scope, style))) : list(atom) => {
 
 let flatten = (decls) => group(walk(decls, blankScope));
 
+let injected = Hashtbl.create(100);
+
 let css = (decls) => {
   let flattened = flatten(decls);
   let className =
     "css-" ++ string_of_int(Hashtbl.hash(flattened)); /* todo - base 62 or something */
-  let cssRules =
-    List.map(
-      ((scope, styles)) =>
-        string_of_scope(
-          scope,
-          className,
-          String.concat("; ", List.map((decl) => string_of_style(decl), styles))
-        ),
-      flattened
-    );
-  List.map(insertRule, cssRules) |> ignore;
+  if (Hashtbl.mem(injected, flattened) === false) {
+    let cssRules =
+      List.map(
+        ((scope, styles)) =>
+          string_of_scope(
+            scope,
+            className,
+            String.concat(";", List.map((decl) => string_of_style(decl), styles))
+          ),
+        flattened
+      );
+    List.map(insertRule, cssRules) |> ignore;
+    Hashtbl.add(injected, flattened, true)
+  };
   className
 };

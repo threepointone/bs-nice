@@ -5,7 +5,8 @@
     "build": "bsb -make-world",
     "start": "bsb -make-world -w",
     "clean": "bsb -clean-world",
-    "site": "parcel site/index.html"
+    "site": "parcel site/index.html",
+    "size": "rollup -c rollup.config.js | uglifyjs -mc | gzip | wc -c"
   },
   "keywords": ["BuckleScript"],
   "license": "MIT",
@@ -16,7 +17,9 @@
     "bs-jest": "^0.2.0",
     "bs-platform": "2.1.0",
     "parcel-bundler": "^1.2.1",
-    "regenerator-runtime": "^0.11.1"
+    "regenerator-runtime": "^0.11.1",
+    "rollup": "^0.53.0",
+    "rollup-plugin-node-resolve": "^3.0.0"
   },
   "jest": {
     "modulePathIgnorePatterns": ["/es6/"]
