@@ -1,0 +1,1 @@
+let base62_of_int: int => string;
