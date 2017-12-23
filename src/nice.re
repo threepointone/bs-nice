@@ -140,8 +140,8 @@ type dimension =
 let string_of_dimension = (value) =>
   switch value {
   | Px(x) => string_of_int(x) ++ "px"
-  | Em(x) => string_of_float(x) ++ "em"
-  | Percent(x) => string_of_float(x) ++ "%"
+  | Em(x) => Printf.sprintf("%f", x) ++ "em"
+  | Percent(x) => Printf.sprintf("%f", x) ++ "%"
   };
 
 type flexBasis =
@@ -172,8 +172,8 @@ type angle =
 
 let string_of_angle = (angle) =>
   switch angle {
-  | Deg(x) => string_of_float(x) ++ "deg"
-  | Rad(x) => string_of_float(x) ++ "rad"
+  | Deg(x) => Printf.sprintf("%f", x) ++ "deg"
+  | Rad(x) => Printf.sprintf("%f", x) ++ "rad"
   };
 
 type transformStyle =
@@ -195,19 +195,20 @@ type transformStyle =
 
 let string_of_transform = (transform) =>
   switch transform {
-  | Perspective(float) => "perspective(" ++ string_of_float(float) ++ ")"
+  | Perspective(float) => "perspective(" ++ Printf.sprintf("%f", float) ++ ")"
   | Rotate(angle) => "rotate(" ++ string_of_angle(angle) ++ ")"
   | RotateX(angle) => "rotateX(" ++ string_of_angle(angle) ++ ")"
   | RotateY(angle) => "rotateY(" ++ string_of_angle(angle) ++ ")"
   | RotateZ(angle) => "rotateZ(" ++ string_of_angle(angle) ++ ")"
-  | Scale(float) => "scale(" ++ string_of_float(float) ++ ")"
-  | ScaleX(float) => "scaleX(" ++ string_of_float(float) ++ ")"
-  | ScaleY(float) => "scaleY(" ++ string_of_float(float) ++ ")"
-  | ScaleZ(float) => "scaleZ(" ++ string_of_float(float) ++ ")"
-  | Translate(x, y) => "translate(" ++ string_of_float(x) ++ ", " ++ string_of_float(y) ++ ")"
-  | TranslateX(float) => "translateX(" ++ string_of_float(float) ++ ")"
-  | TranslateY(float) => "translateY(" ++ string_of_float(float) ++ ")"
-  | TranslateZ(float) => "translateZ(" ++ string_of_float(float) ++ ")"
+  | Scale(float) => "scale(" ++ Printf.sprintf("%f", float) ++ ")"
+  | ScaleX(float) => "scaleX(" ++ Printf.sprintf("%f", float) ++ ")"
+  | ScaleY(float) => "scaleY(" ++ Printf.sprintf("%f", float) ++ ")"
+  | ScaleZ(float) => "scaleZ(" ++ Printf.sprintf("%f", float) ++ ")"
+  | Translate(x, y) =>
+    "translate(" ++ Printf.sprintf("%f", x) ++ ", " ++ Printf.sprintf("%f", y) ++ ")"
+  | TranslateX(float) => "translateX(" ++ Printf.sprintf("%f", float) ++ ")"
+  | TranslateY(float) => "translateY(" ++ Printf.sprintf("%f", float) ++ ")"
+  | TranslateZ(float) => "translateZ(" ++ Printf.sprintf("%f", float) ++ ")"
   | SkewX(angle) => "skewX(" ++ string_of_angle(angle) ++ ")"
   | SkewY(angle) => "skewY(" ++ string_of_angle(angle) ++ ")"
   };
@@ -374,7 +375,7 @@ let string_of_color = (color) =>
     ++ ","
     ++ string_of_int(b)
     ++ ","
-    ++ string_of_float(a)
+    ++ Printf.sprintf("%f", a)
   | HSL(h, s, l) => string_of_int(h) ++ "," ++ string_of_int(s) ++ "," ++ string_of_int(l)
   | HSLa(h, s, l, a) =>
     string_of_int(h)
@@ -383,7 +384,7 @@ let string_of_color = (color) =>
     ++ ","
     ++ string_of_int(l)
     ++ ","
-    ++ string_of_float(a)
+    ++ Printf.sprintf("%f", a)
   | Transparent => "transparent"
   | Aliceblue => "aliceblue"
   | Antiquewhite => "antiquewhite"
@@ -842,8 +843,8 @@ let string_of_style = (style) =>
   | ShadowColor(color) => "shadow-color:" ++ string_of_color(color)
   | ShadowOffset(width, height) =>
     "shadow-offset:" ++ string_of_int(width) ++ "," ++ string_of_int(height)
-  | ShadowOpacity(float) => "shadow-opacity:" ++ string_of_float(float)
-  | ShadowRadius(float) => "shadow-radius:" ++ string_of_float(float)
+  | ShadowOpacity(float) => "shadow-opacity:" ++ Printf.sprintf("%f", float)
+  | ShadowRadius(float) => "shadow-radius:" ++ Printf.sprintf("%f", float)
   /* transform styles */
   | Transform(transformStyles) =>
     "transform:" ++ String.concat(",", List.map(string_of_transform, transformStyles))
@@ -864,20 +865,20 @@ let string_of_style = (style) =>
     "border-bottom-right-radius:" ++ string_of_dimension(dimension)
   | BorderTopLeftRadius(dimension) => "border-top-left-radius:" ++ string_of_dimension(dimension)
   | BorderStyle(borderStyle) => "border-style:" ++ string_of_borderStyle(borderStyle)
-  | Opacity(float) => "opacity:" ++ string_of_float(float)
-  | Elevation(float) => "elevation:" ++ string_of_float(float)
+  | Opacity(float) => "opacity:" ++ Printf.sprintf("%f", float)
+  | Elevation(float) => "elevation:" ++ Printf.sprintf("%f", float)
   /* text styles */
   | Color(color) => "color:" ++ string_of_color(color)
   | FontFamily(string) => "font-family:" ++ string
-  | FontSize(float) => "font-size:" ++ string_of_float(float)
+  | FontSize(float) => "font-size:" ++ Printf.sprintf("%f", float)
   | FontStyle(fontStyle) => "font-style:" ++ string_of_fontStyle(fontStyle)
   | FontWeight(fontWeight) => "font-weight:" ++ string_of_fontWeight(fontWeight)
   | FontVariant(fontVariant) => "font-variant:" ++ string_of_fontVariant(fontVariant)
-  /* | TextShadowOffset(width, height) => "text-shadow-offset:" ++ string_of_float(width) */
-  | TextShadowRadius(float) => "text-shadow-radius:" ++ string_of_float(float)
+  /* | TextShadowOffset(width, height) => "text-shadow-offset:" ++ Printf.sprintf("%f",width) */
+  | TextShadowRadius(float) => "text-shadow-radius:" ++ Printf.sprintf("%f", float)
   | TextShadowColor(color) => "text-shadow-color:" ++ string_of_color(color)
-  | LetterSpacing(float) => "letter-spacing:" ++ string_of_float(float)
-  | LineHeight(float) => "line-height:" ++ string_of_float(float)
+  | LetterSpacing(float) => "letter-spacing:" ++ Printf.sprintf("%f", float)
+  | LineHeight(float) => "line-height:" ++ Printf.sprintf("%f", float)
   | TextAlign(textAlign) => "text-align:" ++ string_of_textAlign(textAlign)
   | TextAlignVertical(textAlignVertical) =>
     "text-align-vertical:" ++ string_of_textAlignVertical(textAlignVertical)
