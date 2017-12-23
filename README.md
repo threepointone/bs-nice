@@ -13,8 +13,8 @@ let className = css([
   Display(Flex),
   AlignItems(Center),
   Color(Red),
-  Select(" ")
-  ])
+  Select(":hover", [Color(Blue)])
+]);
 ```
 
 ## some nice features
