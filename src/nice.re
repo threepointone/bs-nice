@@ -892,12 +892,9 @@ let string_of_style = (style) =>
   | ResizeMode(resizeMode) => "resizemode: " ++ string_of_resizeMode(resizeMode)
   | TintColor(color) => "tintcolor: " ++ string_of_color(color)
   | OverlayColor(color) => "overlay-color" ++ string_of_color(color)
-  /* at rules */
-  /* | MediaQuery(query, ruleset) => "@media " ++ query ++ "{" ++ string_of_ruleset(ruleset) ++ "}" */
-  /* | Supports(string, ruleset) => "@supports " ++ string ++ "{" ++ string_of_ruleset(ruleset) ++ "}" */
-  /* | Select(string, style) */
   /* escape hatch */
   | Raw(key, value) => key ++ ": " ++ value
+  /* at-rules handled before they get here */
   | _ => raise(Not_found)
   };
 
@@ -954,28 +951,29 @@ let string_of_scope = (scope: scope, hash: string, content: string) => {
   prefix^ ++ content ++ suffix^
 };
 
-let flatten = (decls: ruleset) => walk(decls, {mqs: [], supps: [], selectors: []});
-
 type atom = (scope, ruleset);
 
+/* wtf is going on here */
 let group = (normalized: list((scope, style))) : list(atom) => {
   let result =
     List.fold_left(
       ((rest: list(atom), lastScope: scope, styles: ruleset), (scope: scope, style: style)) =>
-        lastScope == scope ?
+        lastScope === scope ?
           (rest, scope, List.concat([styles, [style]])) :
           (List.concat([rest, [(lastScope, styles)]]), scope, [style]),
-      ([], {mqs: [], supps: [], selectors: []}, []: ruleset),
+      ([], {mqs: [], supps: [], selectors: []}: scope, []: ruleset),
       normalized
     );
   let (rest, scope, styles) = result;
   List.concat([rest, [(scope, styles)]])
 };
 
+let flatten = (decls) => group(walk(decls, {mqs: [], supps: [], selectors: []}));
+
 let css = (decls) => {
-  let g = group(flatten(decls));
-  let className = "css-" ++ string_of_int(Hashtbl.hash(g)); /* todo - base 62 or something */
-  /* let content = String.concat("; ", List.map((decl) => string_of_style(decl), decls)); */
+  let flattened = flatten(decls);
+  let className =
+    "css-" ++ string_of_int(Hashtbl.hash(flattened)); /* todo - base 62 or something */
   let cssRules =
     List.map(
       ((scope, styles)) =>
@@ -984,10 +982,8 @@ let css = (decls) => {
           className,
           String.concat("; ", List.map((decl) => string_of_style(decl), styles))
         ),
-      g
+      flattened
     );
-  Js.log(String.concat("\n", cssRules));
-  insertRule(String.concat("\n", cssRules));
-  /* insertRule("." ++ className ++ "{" ++ css ++ "}"); */
+  List.map(insertRule, cssRules) |> ignore;
   className
 };

@@ -1,5 +1,5 @@
 open Nice;
 
-let className = css([Display(Flex), MediaQuery("screen", [Display(Block)]), Color(Red)]);
+let className = css([MediaQuery("screen", [Display(Block)]), Display(Flex), Color(Red)]);
 
 Js.log(className);

@@ -4,8 +4,6 @@ yarn start
 yarn site
 ```
 
-* nested selectors
-* @media, @support
 * vendor prefixing
+* hot reloading
 * 'server' side
-
