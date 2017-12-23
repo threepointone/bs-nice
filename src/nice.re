@@ -794,79 +794,78 @@ and ruleset = list(style);
 
 let string_of_style = (style) =>
   switch style {
-  | Display(display) => "display: " ++ string_of_display(display)
-  | Width(dimension) => "width: " ++ string_of_dimension(dimension)
-  | Height(dimension) => "height: " ++ string_of_dimension(dimension)
-  | Top(dimension) => "top: " ++ string_of_dimension(dimension)
-  | Bottom(dimension) => "bottom: " ++ string_of_dimension(dimension)
-  | Left(dimension) => "left: " ++ string_of_dimension(dimension)
-  | Right(dimension) => "right: " ++ string_of_dimension(dimension)
-  | MinWidth(dimension) => "min-width: " ++ string_of_dimension(dimension)
-  | MaxWidth(dimension) => "max-width: " ++ string_of_dimension(dimension)
-  | MinHeight(dimension) => "minheight: " ++ string_of_dimension(dimension)
-  | MaxHeight(dimension) => "maxheight: " ++ string_of_dimension(dimension)
-  | Margin(dimension) => "margin: " ++ string_of_dimension(dimension)
-  | MarginVertical(dimension) => "margin-vertical: " ++ string_of_dimension(dimension)
-  | MarginHorizontal(dimension) => "margin-horizontal: " ++ string_of_dimension(dimension)
-  | MarginTop(dimension) => "margin-top: " ++ string_of_dimension(dimension)
-  | MarginBottom(dimension) => "margin-bottom: " ++ string_of_dimension(dimension)
-  | MarginLeft(dimension) => "margin-left: " ++ string_of_dimension(dimension)
-  | MarginRight(dimension) => "margin-right: " ++ string_of_dimension(dimension)
-  | Padding(dimension) => "padding: " ++ string_of_dimension(dimension)
-  | PaddingVertical(dimension) => "padding-vertical: " ++ string_of_dimension(dimension)
-  | PaddingHorizontal(dimension) => "padding-horizontal: " ++ string_of_dimension(dimension)
-  | PaddingTop(dimension) => "padding-top: " ++ string_of_dimension(dimension)
-  | PaddingBottom(dimension) => "padding-bottom: " ++ string_of_dimension(dimension)
-  | PaddingLeft(dimension) => "padding-left: " ++ string_of_dimension(dimension)
-  | PaddingRight(dimension) => "padding-right: " ++ string_of_dimension(dimension)
-  | BorderWidth(dimension) => "border-width: " ++ string_of_dimension(dimension)
-  | BorderTopWidth(dimension) => "border-top-width: " ++ string_of_dimension(dimension)
-  | BorderBottomWidth(dimension) => "border-bottom-width: " ++ string_of_dimension(dimension)
-  | BorderLeftWidth(dimension) => "border-left-width: " ++ string_of_dimension(dimension)
-  | BorderRightWidth(dimension) => "border-right-width: " ++ string_of_dimension(dimension)
-  | Position(position) => "position: " ++ string_of_position(position)
-  | FlexDirection(flexDirection) => "flex-direction: " ++ string_of_flexDirection(flexDirection)
-  | FlexWrap(flexWrap) => "flex-wrap: " ++ string_of_flexWrap(flexWrap)
+  | Display(display) => "display:" ++ string_of_display(display)
+  | Width(dimension) => "width:" ++ string_of_dimension(dimension)
+  | Height(dimension) => "height:" ++ string_of_dimension(dimension)
+  | Top(dimension) => "top:" ++ string_of_dimension(dimension)
+  | Bottom(dimension) => "bottom:" ++ string_of_dimension(dimension)
+  | Left(dimension) => "left:" ++ string_of_dimension(dimension)
+  | Right(dimension) => "right:" ++ string_of_dimension(dimension)
+  | MinWidth(dimension) => "min-width:" ++ string_of_dimension(dimension)
+  | MaxWidth(dimension) => "max-width:" ++ string_of_dimension(dimension)
+  | MinHeight(dimension) => "minheight:" ++ string_of_dimension(dimension)
+  | MaxHeight(dimension) => "maxheight:" ++ string_of_dimension(dimension)
+  | Margin(dimension) => "margin:" ++ string_of_dimension(dimension)
+  | MarginVertical(dimension) => "margin-vertical:" ++ string_of_dimension(dimension)
+  | MarginHorizontal(dimension) => "margin-horizontal:" ++ string_of_dimension(dimension)
+  | MarginTop(dimension) => "margin-top:" ++ string_of_dimension(dimension)
+  | MarginBottom(dimension) => "margin-bottom:" ++ string_of_dimension(dimension)
+  | MarginLeft(dimension) => "margin-left:" ++ string_of_dimension(dimension)
+  | MarginRight(dimension) => "margin-right:" ++ string_of_dimension(dimension)
+  | Padding(dimension) => "padding:" ++ string_of_dimension(dimension)
+  | PaddingVertical(dimension) => "padding-vertical:" ++ string_of_dimension(dimension)
+  | PaddingHorizontal(dimension) => "padding-horizontal:" ++ string_of_dimension(dimension)
+  | PaddingTop(dimension) => "padding-top:" ++ string_of_dimension(dimension)
+  | PaddingBottom(dimension) => "padding-bottom:" ++ string_of_dimension(dimension)
+  | PaddingLeft(dimension) => "padding-left:" ++ string_of_dimension(dimension)
+  | PaddingRight(dimension) => "padding-right:" ++ string_of_dimension(dimension)
+  | BorderWidth(dimension) => "border-width:" ++ string_of_dimension(dimension)
+  | BorderTopWidth(dimension) => "border-top-width:" ++ string_of_dimension(dimension)
+  | BorderBottomWidth(dimension) => "border-bottom-width:" ++ string_of_dimension(dimension)
+  | BorderLeftWidth(dimension) => "border-left-width:" ++ string_of_dimension(dimension)
+  | BorderRightWidth(dimension) => "border-right-width:" ++ string_of_dimension(dimension)
+  | Position(position) => "position:" ++ string_of_position(position)
+  | FlexDirection(flexDirection) => "flex-direction:" ++ string_of_flexDirection(flexDirection)
+  | FlexWrap(flexWrap) => "flex-wrap:" ++ string_of_flexWrap(flexWrap)
   | JustifyContent(justifyContent) =>
-    "justify-content: " ++ string_of_justifyContent(justifyContent)
-  | AlignItems(alignItems) => "align-items: " ++ string_of_alignItems(alignItems)
-  | AlignSelf(alignSelf) => "align-self: " ++ string_of_alignSelf(alignSelf)
-  | AlignContent(alignContent) => "align-content: " ++ string_of_alignContent(alignContent)
-  | Overflow(overflow) => "overflow: " ++ string_of_overflow(overflow)
-  | Flex(int) => "flex: " ++ string_of_int(int)
-  | FlexGrow(int) => "flex-grow: " ++ string_of_int(int)
-  | FlexShrink(int) => "flex-shrink: " ++ string_of_int(int)
-  | FlexBasisi(int) => "flex-basis: " ++ string_of_int(int)
-  | FlexBasis(flexBasis) => "flex-basis: " ++ string_of_flexBasis(flexBasis)
+    "justify-content:" ++ string_of_justifyContent(justifyContent)
+  | AlignItems(alignItems) => "align-items:" ++ string_of_alignItems(alignItems)
+  | AlignSelf(alignSelf) => "align-self:" ++ string_of_alignSelf(alignSelf)
+  | AlignContent(alignContent) => "align-content:" ++ string_of_alignContent(alignContent)
+  | Overflow(overflow) => "overflow:" ++ string_of_overflow(overflow)
+  | Flex(int) => "flex:" ++ string_of_int(int)
+  | FlexGrow(int) => "flex-grow:" ++ string_of_int(int)
+  | FlexShrink(int) => "flex-shrink:" ++ string_of_int(int)
+  | FlexBasisi(int) => "flex-basis:" ++ string_of_int(int)
+  | FlexBasis(flexBasis) => "flex-basis:" ++ string_of_flexBasis(flexBasis)
   /* shadow styles */
-  | ShadowColor(color) => "shadow-color: " ++ string_of_color(color)
+  | ShadowColor(color) => "shadow-color:" ++ string_of_color(color)
   | ShadowOffset(width, height) =>
-    "shadow-offset: " ++ string_of_int(width) ++ "," ++ string_of_int(height)
-  | ShadowOpacity(float) => "shadow-opacity: " ++ string_of_float(float)
-  | ShadowRadius(float) => "shadow-radius: " ++ string_of_float(float)
+    "shadow-offset:" ++ string_of_int(width) ++ "," ++ string_of_int(height)
+  | ShadowOpacity(float) => "shadow-opacity:" ++ string_of_float(float)
+  | ShadowRadius(float) => "shadow-radius:" ++ string_of_float(float)
   /* transform styles */
   | Transform(transformStyles) =>
-    "transform: " ++ String.concat(", ", List.map(string_of_transform, transformStyles))
+    "transform:" ++ String.concat(",", List.map(string_of_transform, transformStyles))
   /* view styles */
   | BackfaceVisibilty(backfaceVisibilty) =>
-    "backface-visibilty: " ++ string_of_backfaceVisibilty(backfaceVisibilty)
-  | BackgroundColor(color) => "background-color: " ++ string_of_color(color)
-  | BorderColor(color) => "border-color: " ++ string_of_color(color)
-  | BorderTopColor(color) => "border-top-color: " ++ string_of_color(color)
-  | BorderBottomColor(color) => "border-bottom-color: " ++ string_of_color(color)
-  | BorderLeftColor(color) => "border-left-color: " ++ string_of_color(color)
-  | BorderRightColor(color) => "border-right-color: " ++ string_of_color(color)
-  | BorderRadius(dimension) => "border-radius: " ++ string_of_dimension(dimension)
-  | BorderTopRightRadius(dimension) =>
-    "border-top-right-radius: " ++ string_of_dimension(dimension)
+    "backface-visibilty:" ++ string_of_backfaceVisibilty(backfaceVisibilty)
+  | BackgroundColor(color) => "background-color:" ++ string_of_color(color)
+  | BorderColor(color) => "border-color:" ++ string_of_color(color)
+  | BorderTopColor(color) => "border-top-color:" ++ string_of_color(color)
+  | BorderBottomColor(color) => "border-bottom-color:" ++ string_of_color(color)
+  | BorderLeftColor(color) => "border-left-color:" ++ string_of_color(color)
+  | BorderRightColor(color) => "border-right-color:" ++ string_of_color(color)
+  | BorderRadius(dimension) => "border-radius:" ++ string_of_dimension(dimension)
+  | BorderTopRightRadius(dimension) => "border-top-right-radius:" ++ string_of_dimension(dimension)
   | BorderBottomLeftRadius(dimension) =>
-    "border-bottom-left-radius: " ++ string_of_dimension(dimension)
+    "border-bottom-left-radius:" ++ string_of_dimension(dimension)
   | BorderBottomRightRadius(dimension) =>
-    "border-bottom-right-radius: " ++ string_of_dimension(dimension)
-  | BorderTopLeftRadius(dimension) => "border-top-left-radius: " ++ string_of_dimension(dimension)
-  | BorderStyle(borderStyle) => "border-style: " ++ string_of_borderStyle(borderStyle)
-  | Opacity(float) => "opacity: " ++ string_of_float(float)
-  | Elevation(float) => "elevation: " ++ string_of_float(float)
+    "border-bottom-right-radius:" ++ string_of_dimension(dimension)
+  | BorderTopLeftRadius(dimension) => "border-top-left-radius:" ++ string_of_dimension(dimension)
+  | BorderStyle(borderStyle) => "border-style:" ++ string_of_borderStyle(borderStyle)
+  | Opacity(float) => "opacity:" ++ string_of_float(float)
+  | Elevation(float) => "elevation:" ++ string_of_float(float)
   /* text styles */
   | Color(color) => "color:" ++ string_of_color(color)
   | FontFamily(string) => "font-family:" ++ string
@@ -889,11 +888,11 @@ let string_of_style = (style) =>
   | WritingDirection(writingDirection) =>
     "writing-direction:" ++ string_of_writingDirection(writingDirection)
   /* image styles */
-  | ResizeMode(resizeMode) => "resizemode: " ++ string_of_resizeMode(resizeMode)
-  | TintColor(color) => "tintcolor: " ++ string_of_color(color)
+  | ResizeMode(resizeMode) => "resizemode:" ++ string_of_resizeMode(resizeMode)
+  | TintColor(color) => "tintcolor:" ++ string_of_color(color)
   | OverlayColor(color) => "overlay-color" ++ string_of_color(color)
   /* escape hatch */
-  | Raw(key, value) => key ++ ": " ++ value
+  | Raw(key, value) => key ++ ":" ++ value
   /* at-rules handled before they get here */
   | _ => raise(Not_found)
   };
@@ -1031,9 +1030,9 @@ let rehydrate = (ids) => {};
 let extract = (html: string) : list(string) => [];
 
 module Presets = {
-  let mobile = "(min-width: 400px)";
-  let phablet = "(min-width: 550px)";
-  let tablet = "(min-width: 750px)";
-  let desktop = "(min-width: 1000px)";
-  let hd = "(min-width: 1200px)";
+  let mobile = "(min-width:400px)";
+  let phablet = "(min-width:550px)";
+  let tablet = "(min-width:750px)";
+  let desktop = "(min-width:1000px)";
+  let hd = "(min-width:1200px)";
 };
