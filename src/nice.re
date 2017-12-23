@@ -118,12 +118,18 @@ let string_of_overflow = (overflow) =>
 
 type display =
   | None
+  | Block
+  | Inline
+  | InlineBlock
   | Flex;
 
 let string_of_display = (display: display) =>
   switch display {
   | None => "none"
   | Flex => "flex"
+  | Block => "block"
+  | Inline => "inline"
+  | InlineBlock => "inline-block"
   };
 
 type dimension =
@@ -908,9 +914,80 @@ let insertRule: string => unit = [%bs.raw
     }|}
 ];
 
+type scope = {
+  mqs: list(string),
+  supps: list(string),
+  selectors: list(string)
+};
+
+let rec walk = (decls, scope) =>
+  List.fold_left(
+    (acc, style) =>
+      switch style {
+      | MediaQuery(q, ruleset) => walk(ruleset, {...scope, mqs: List.concat([scope.mqs, [q]])})
+      | Supports(s, ruleset) => walk(ruleset, {...scope, supps: List.concat([scope.supps, [s]])})
+      | Select(p, ruleset) =>
+        walk(ruleset, {...scope, selectors: List.concat([scope.selectors, [p]])})
+      | x => List.concat([acc, [(scope, x)]])
+      },
+    [],
+    decls
+  );
+
+let string_of_scope = (scope: scope, hash: string, content: string) => {
+  let prefix = ref("");
+  let suffix = ref("");
+  if (List.length(scope.mqs) > 0) {
+    prefix := "@media " ++ String.concat(" and ", scope.mqs) ++ "{";
+    suffix := suffix^ ++ "}"
+  };
+  if (List.length(scope.supps) > 0) {
+    suffix := suffix^ ++ "}";
+    prefix := prefix^ ++ "@supports " ++ String.concat(" and ", scope.supps) ++ "{"
+  };
+  prefix := prefix^ ++ "." ++ hash;
+  if (List.length(scope.selectors) > 0) {
+    prefix := prefix^ ++ String.concat("", scope.selectors)
+  };
+  prefix := prefix^ ++ "{";
+  suffix := suffix^ ++ "}";
+  prefix^ ++ content ++ suffix^
+};
+
+let flatten = (decls: ruleset) => walk(decls, {mqs: [], supps: [], selectors: []});
+
+type atom = (scope, ruleset);
+
+let group = (normalized: list((scope, style))) : list(atom) => {
+  let result =
+    List.fold_left(
+      ((rest: list(atom), lastScope: scope, styles: ruleset), (scope: scope, style: style)) =>
+        lastScope == scope ?
+          (rest, scope, List.concat([styles, [style]])) :
+          (List.concat([rest, [(lastScope, styles)]]), scope, [style]),
+      ([], {mqs: [], supps: [], selectors: []}, []: ruleset),
+      normalized
+    );
+  let (rest, scope, styles) = result;
+  List.concat([rest, [(scope, styles)]])
+};
+
 let css = (decls) => {
-  let className = "css-" ++ string_of_int(Hashtbl.hash(decls)); /* todo - base 62 or something */
-  let css = String.concat("; ", List.map((decl) => string_of_style(decl), decls));
-  insertRule("." ++ className ++ "{" ++ css ++ "}");
+  let g = group(flatten(decls));
+  let className = "css-" ++ string_of_int(Hashtbl.hash(g)); /* todo - base 62 or something */
+  /* let content = String.concat("; ", List.map((decl) => string_of_style(decl), decls)); */
+  let cssRules =
+    List.map(
+      ((scope, styles)) =>
+        string_of_scope(
+          scope,
+          className,
+          String.concat("; ", List.map((decl) => string_of_style(decl), styles))
+        ),
+      g
+    );
+  Js.log(String.concat("\n", cssRules));
+  insertRule(String.concat("\n", cssRules));
+  /* insertRule("." ++ className ++ "{" ++ css ++ "}"); */
   className
 };

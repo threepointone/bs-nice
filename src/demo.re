@@ -1,6 +1,5 @@
 open Nice;
 
-let className =
-  css([Display(Flex), JustifyContent(Center), AlignItems(FlexStart), ResizeMode(Cover)]);
+let className = css([Display(Flex), MediaQuery("screen", [Display(Block)]), Color(Red)]);
 
 Js.log(className);
