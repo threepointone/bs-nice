@@ -917,20 +917,6 @@ type scope = {
   selectors: list(string)
 };
 
-let rec walk = (decls, scope) =>
-  List.fold_left(
-    (acc, style) =>
-      switch style {
-      | MediaQuery(q, ruleset) => walk(ruleset, {...scope, mqs: List.concat([scope.mqs, [q]])})
-      | Supports(s, ruleset) => walk(ruleset, {...scope, supps: List.concat([scope.supps, [s]])})
-      | Select(p, ruleset) =>
-        walk(ruleset, {...scope, selectors: List.concat([scope.selectors, [p]])})
-      | x => List.concat([acc, [(scope, x)]])
-      },
-    [],
-    decls
-  );
-
 let string_of_scope = (scope: scope, hash: string, content: string) => {
   let prefix = ref("");
   let suffix = ref("");
@@ -951,24 +937,44 @@ let string_of_scope = (scope: scope, hash: string, content: string) => {
   prefix^ ++ content ++ suffix^
 };
 
+let blankScope = {mqs: [], supps: [], selectors: []};
+
+let rec walk = (decls, scope) =>
+  List.fold_left(
+    (acc, style) =>
+      switch style {
+      | MediaQuery(q, ruleset) =>
+        List.concat([acc, walk(ruleset, {...scope, mqs: List.concat([scope.mqs, [q]])})])
+      | Supports(s, ruleset) =>
+        List.concat([acc, walk(ruleset, {...scope, supps: List.concat([scope.supps, [s]])})])
+      | Select(p, ruleset) =>
+        List.concat([
+          acc,
+          walk(ruleset, {...scope, selectors: List.concat([scope.selectors, [p]])})
+        ])
+      | x => List.concat([acc, [(scope, x)]])
+      },
+    [],
+    decls
+  );
+
 type atom = (scope, ruleset);
 
 /* wtf is going on here */
 let group = (normalized: list((scope, style))) : list(atom) => {
-  let result =
+  let (rest, scope, styles) =
     List.fold_left(
       ((rest: list(atom), lastScope: scope, styles: ruleset), (scope: scope, style: style)) =>
-        lastScope === scope ?
+        lastScope == scope ?
           (rest, scope, List.concat([styles, [style]])) :
           (List.concat([rest, [(lastScope, styles)]]), scope, [style]),
-      ([], {mqs: [], supps: [], selectors: []}: scope, []: ruleset),
+      ([], blankScope, []: ruleset),
       normalized
     );
-  let (rest, scope, styles) = result;
   List.concat([rest, [(scope, styles)]])
 };
 
-let flatten = (decls) => group(walk(decls, {mqs: [], supps: [], selectors: []}));
+let flatten = (decls) => group(walk(decls, blankScope));
 
 let css = (decls) => {
   let flattened = flatten(decls);
