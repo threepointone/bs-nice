@@ -4,8 +4,6 @@
 
 css-in-reason. just because.
 
-## usage
-
 ```reason
 open Nice;
 
@@ -21,13 +19,15 @@ let className = css([
 
 * pure reason
 * typed css
-* glamor style composition
+* glamor-style composition
 * escape hatch - `Raw(key, value)`
 
 ## todo
 
 * keyframes / animations
+* font-faces
 * vendor prefixing
+* better types
 * ~ hot reloading
 * 'server' side
 * benchmarks / tests
