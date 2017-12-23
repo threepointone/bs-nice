@@ -983,18 +983,16 @@ let insertRule: string => unit = [%bs.raw
 ];
 
 let base62_of_int = int => {
-  let num = ref(int * Js.Math.sign_int(int));
-  let conversion = ref("");
   let symbols =
-    Js.String.split(
-      "",
+    String.get(
       "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     );
-  while (num^ > 0) {
-    conversion := symbols[num^ - 62 * (num^ / 62)] ++ conversion^;
-    num := num^ / 62;
-  };
-  conversion^;
+  let rec fn = (n, c) =>
+    switch n {
+    | 0 => c
+    | _ => fn(n / 62, n - 62 * (n / 62) |> symbols |> Char.escaped) ++ c
+    };
+  fn(abs(int), "");
 };
 
 let css = (decls) => {
