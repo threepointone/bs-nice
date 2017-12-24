@@ -121,7 +121,8 @@ type display =
   | Block
   | Inline
   | InlineBlock
-  | Flex;
+  | Flex
+  | Grid;
 
 let string_of_display = (display: display) =>
   switch display {
@@ -130,6 +131,7 @@ let string_of_display = (display: display) =>
   | Block => "block"
   | Inline => "inline"
   | InlineBlock => "inline-block"
+  | Grid => "grid"
   };
 
 type dimension =
