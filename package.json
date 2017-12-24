@@ -9,11 +9,7 @@
     "site": "parcel site/index.html",
     "size": "rollup -c rollup.config.js | uglifyjs -mc | gzip | wc -c"
   },
-  "keywords": [
-    "reason"
-    "bucklescript",
-    "css"
-  ],
+  "keywords": ["reason", "bucklescript", "css"],
   "repository": "https://github.com/threepointone/bs-nice",
   "homepage": "https://github.com/threepointone/bs-nice#readme",
   "bugs": "https://github.com/threepointone/bs-nice/issues",
@@ -26,8 +22,7 @@
     "rollup-plugin-node-resolve": "^3.0.0"
   },
   "jest": {
-    "modulePathIgnorePatterns": [
-      "/es6/"
-    ]
+    "modulePathIgnorePatterns": ["/es6/"]
   }
 }
+
