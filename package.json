@@ -1,6 +1,7 @@
 {
   "name": "bs-nice",
   "version": "0.1.0",
+  "description": "css-in-reason",
   "scripts": {
     "build": "bsb -make-world",
     "start": "bsb -make-world -w",
@@ -9,8 +10,13 @@
     "size": "rollup -c rollup.config.js | uglifyjs -mc | gzip | wc -c"
   },
   "keywords": [
-    "BuckleScript"
+    "reason"
+    "bucklescript",
+    "css"
   ],
+  "repository": "https://github.com/threepointone/bs-nice",
+  "homepage": "https://github.com/threepointone/bs-nice#readme",
+  "bugs": "https://github.com/threepointone/bs-nice/issues",
   "license": "MIT",
   "devDependencies": {
     "bs-jest": "^0.2.0",
