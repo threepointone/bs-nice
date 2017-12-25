@@ -782,7 +782,7 @@ type style =
   | Initial(string)
   | Inherit(string)
   | Raw(string, string)
-and ruleset = list(style);
+and ruleset = array(style);
 
 let string_of_style =
   fun
@@ -1005,54 +1005,35 @@ let string_of_scope = (scope: scope, hash: string, content: string) => {
 
 let blankScope = {mqs: [], supps: [], selectors: ["&"]};
 
-let rec walk = (decls, scope) =>
-  List.fold_left(
-    (acc, style) =>
-      switch style {
+let rec walk = (decls, idx, scope, acc) =>
+  if (Array.length(decls) - idx == 0) {
+    acc
+  } else {
+      switch decls[Array.length(decls) - idx - 1] {
       | MediaQuery(q, ruleset) =>
-        List.concat([
-          acc,
-          walk(ruleset, {...scope, mqs: List.concat([scope.mqs, [q]])})
-        ])
+        walk(decls, idx+1, scope, walk(ruleset, 0, {...scope, mqs: List.concat([scope.mqs, [q]])}, acc))
       | Supports(s, ruleset) =>
-        List.concat([
-          acc,
-          walk(ruleset, {...scope, supps: List.concat([scope.supps, [s]])})
-        ])
+        walk(decls, idx+1, scope, walk(ruleset, 0, {...scope, supps: List.concat([scope.supps, [s]])}, acc))
       | Select(p, ruleset) =>
-        List.concat([
-          acc,
-          walk(
-            ruleset,
-            {...scope, selectors: List.concat([scope.selectors, [p]])}
-          )
-        ])
-      | x => List.concat([acc, [(scope, x)]])
-      },
-    [],
-    decls
-  );
+          walk(decls, idx+1, scope, walk(ruleset, 0, {...scope, selectors: List.concat([scope.selectors, [p]])}, acc))
+      | x => walk(decls, idx+1, scope, [(scope, x), ...acc])
+      };
+  };
 
-type atom = (scope, ruleset);
+type atom = (scope, list(style));
 
-/* wtf is going on here */
-let group = (normalized: list((scope, style))) : list(atom) => {
-  let (rest, scope, styles) =
-    List.fold_left(
-      (
-        (rest: list(atom), lastScope: scope, styles: ruleset),
-        (scope: scope, style: style)
-      ) =>
-        lastScope === scope ?
-          (rest, scope, List.concat([styles, [style]])) :
-          (List.concat([rest, [(lastScope, styles)]]), scope, [style]),
-      ([], blankScope, []: ruleset),
-      normalized
-    );
-  List.concat([rest, [(scope, styles)]]);
+let rec group = (normalized: list((scope, style))) : list(atom) => {
+  switch normalized {
+  | [] => []
+  | [(scope, style), ...t] => switch (group(t)) {
+    | [] => [(scope, [style])]
+    | [(lastScope, styles), ...t] when lastScope === scope => [(lastScope, [style, ...styles]), ...t]
+    | l => [(scope, [style]), ...l]
+  }
+  }
 };
 
-let flatten = decls => group(walk(decls, blankScope));
+let flatten = (decls) => group(walk(decls, 0, blankScope, []));
 
 let global_cache = Hashtbl.create(100);
 
