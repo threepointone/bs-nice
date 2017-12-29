@@ -1045,26 +1045,36 @@ let flush = () => {
   Hashtbl.reset(rule_cache);
 };
 
+[@bs.val] external document: Dom.document = "document";
+[@bs.send] external querySelector: (Dom.document, string) => Js.Nullable.t(Dom.element) = "querySelector";
+[@bs.send] external createElement: (Dom.document, string) => Dom.element = "createElement";
+[@bs.send] external setAttribute: (Dom.element, string, string) => unit = "";
+[@bs.get] external head: (Dom.document) => Dom.element = "";
+[@bs.send] external appendChild: (Dom.element, Dom.element) => unit = "";
+[@bs.send] external insertCssRule: (Dom.cssStyleSheet, string, int) => unit = "insertRule";
+[@bs.get] external sheet: (Dom.element) => Dom.cssStyleSheet = "";
+[@bs.get] external cssRules: (Dom.cssStyleSheet) => Dom.cssStyleDeclaration = "";
+[@bs.get] external length: (Dom.cssStyleDeclaration) => int = "";
+[@bs.send] external createTextNode: (Dom.document, string) => Dom.element = "";
+[@bs.scope "process.env"] [@bs.val] external node_env: string = "NODE_ENV";
+
 /* todo - server/node  */
 /* todo - server/native */
-let insertRule: string => unit = [%bs.raw
-  {|function(rule){
-    if(typeof window === "undefined"){
-      return
-    }
-      var tag = document.querySelector('style[data-nice]');
-      if(!tag){
-        tag = document.createElement('style');
-        tag.setAttribute('data-nice', '');
-        document.head.appendChild(tag);
-      }
-      if(process.env.NODE_ENV === 'production'){
-
-      } else {
-        tag.appendChild(document.createTextNode(rule));
-      }
-    }|}
-];
+let insertRule = (rule) => {
+  let tag = switch (Js.Nullable.to_opt(querySelector(document, "style[data-nice]"))) {
+    | None => 
+      let tag = createElement(document, "style");
+      setAttribute(tag, "data-nice", "");
+      appendChild(document |> head, tag);
+      tag
+    | Some(tag) => tag
+  };
+  if(node_env === "production"){
+    insertCssRule(tag |> sheet, rule, tag |> sheet |> cssRules |> length);
+  } else {
+    appendChild(tag, createTextNode(document, rule));
+  };
+};
 
 let alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
