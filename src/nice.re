@@ -918,9 +918,8 @@ let string_of_style =
 
 /* at-rules handled before they get here */
 /* | _ => raise(Not_found); */
-let selectorTokenizer = [%bs.re
-  {|/[(),]|"(?:\\.|[^"\n])*"|'(?:\\.|[^'\n])*'|\/\*[\s\S]*?\*\//g|}
-];
+
+let selectorTokenizer: Js.Re.t = [%bs.raw {|/[(),]|"(?:\\.|[^"\n])*"|'(?:\\.|[^'\n])*'|\/\*[\s\S]*?\*\//g |}];
 
 /* todo - rewrite in pure reason */
 let splitSelector: string => array(string) = [%bs.raw
