@@ -949,13 +949,10 @@ let splitSelector: string => array(string) = [%bs.raw
     |}
 ];
 
-let replace: (string, string) => string = [%bs.raw
-  {|
-  function(src, _with){
-    return src.replace(/\&/g, _with);
-  }
-  |}
-];
+let replacementRegex = Js.Re.fromStringWithFlags("&", ~flags="g");
+let replace = (str, _with) => {
+  Js.String.replaceByRe(replacementRegex, str, _with);
+};
 
 let join_selectors = (a, b) => {
   let ax =
