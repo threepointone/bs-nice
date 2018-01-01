@@ -118,10 +118,12 @@ let string_of_overflow = (overflow) =>
 
 type display =
   | None
+  | Flex
   | Block
   | Inline
+  | InlineFlex
   | InlineBlock
-  | Flex;
+  | Grid;
 
 let string_of_display = (display: display) =>
   switch display {
@@ -129,7 +131,9 @@ let string_of_display = (display: display) =>
   | Flex => "flex"
   | Block => "block"
   | Inline => "inline"
+  | InlineFlex => "inline-flex"
   | InlineBlock => "inline-block"
+  | Grid => "grid"
   };
 
 type dimension =
@@ -735,7 +739,8 @@ type style =
   | AlignSelf(alignSelf)
   | AlignContent(alignContent)
   | Overflow(overflow)
-  | Flex(int)
+  | OverflowX(overflow)
+  | OverflowY(overflow)
   | FlexGrow(int)
   | FlexShrink(int)
   | FlexBasisi(int)
@@ -834,7 +839,8 @@ let string_of_style = (style) =>
   | AlignSelf(alignSelf) => "align-self:" ++ string_of_alignSelf(alignSelf)
   | AlignContent(alignContent) => "align-content:" ++ string_of_alignContent(alignContent)
   | Overflow(overflow) => "overflow:" ++ string_of_overflow(overflow)
-  | Flex(int) => "flex:" ++ string_of_int(int)
+  | OverflowX(overflow) => "overflow-x:" ++ string_of_overflow(overflow)
+  | OverflowY(overflow) => "overflow-y:" ++ string_of_overflow(overflow)
   | FlexGrow(int) => "flex-grow:" ++ string_of_int(int)
   | FlexShrink(int) => "flex-shrink:" ++ string_of_int(int)
   | FlexBasisi(int) => "flex-basis:" ++ string_of_int(int)
