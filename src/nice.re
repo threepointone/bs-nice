@@ -26,6 +26,31 @@ let string_of_flexDirection = (direction) =>
   | ColumnReverse => "column-reverse"
   };
 
+let prefix_flexDirection = (direction) =>
+  String.concat(
+    "",
+    [
+      Prefix.combine_pairs(
+        ["flex-direction", "-webkit-flex-direction", "-ms-flex-direction"],
+        [string_of_flexDirection(direction)]
+      ),
+      ";-webkit-box-orient:",
+      switch direction {
+      | Row
+      | RowReverse => "horizontal"
+      | ColumnReverse
+      | Column => "vertical"
+      },
+      ";-webkit-box-direction:",
+      switch direction {
+      | Column
+      | Row => "normal"
+      | RowReverse
+      | ColumnReverse => "reverse"
+      }
+    ]
+  );
+
 type flexWrap =
   | Wrap
   | NoWrap;
@@ -35,6 +60,11 @@ let string_of_flexWrap = (wrap) =>
   | Wrap => "wrap"
   | NoWrap => "nowrap"
   };
+
+let string_of_order = (int) => "order:" ++ string_of_int(int);
+
+let prefix_order = (int) =>
+  string_of_order(int) ++ ";-webkit-box-ordinal-group:" ++ string_of_int(int + 1);
 
 type justifyContent =
   | FlexStart
@@ -134,6 +164,14 @@ let string_of_display = (display: display) =>
   | InlineFlex => "inline-flex"
   | InlineBlock => "inline-block"
   | Grid => "grid"
+  };
+
+let prefix_display = (display: display) =>
+  switch display {
+  | Flex => Prefix.combine_pairs(["display"], ["-webkit-flex", "flex"])
+  | InlineFlex =>
+    Prefix.combine_pairs(["display"], ["-ms-inline-flexbox", "-webkit-inline-flex", "inline-flex"])
+  | _ => "display:" ++ string_of_display(display)
   };
 
 type dimension =
@@ -734,6 +772,7 @@ type style =
   | Position(position)
   | FlexDirection(flexDirection)
   | FlexWrap(flexWrap)
+  | Order(int)
   | JustifyContent(justifyContent)
   | AlignItems(alignItems)
   | AlignSelf(alignSelf)
@@ -800,7 +839,7 @@ and ruleset = list(style);
 
 let string_of_style = (style) =>
   switch style {
-  | Display(display) => "display:" ++ string_of_display(display)
+  | Display(display) => prefix_display(display)
   | Width(dimension) => "width:" ++ string_of_dimension(dimension)
   | Height(dimension) => "height:" ++ string_of_dimension(dimension)
   | Top(dimension) => "top:" ++ string_of_dimension(dimension)
@@ -831,8 +870,9 @@ let string_of_style = (style) =>
   | BorderLeftWidth(dimension) => "border-left-width:" ++ string_of_dimension(dimension)
   | BorderRightWidth(dimension) => "border-right-width:" ++ string_of_dimension(dimension)
   | Position(position) => "position:" ++ string_of_position(position)
-  | FlexDirection(flexDirection) => "flex-direction:" ++ string_of_flexDirection(flexDirection)
+  | FlexDirection(flexDirection) => prefix_flexDirection(flexDirection)
   | FlexWrap(flexWrap) => "flex-wrap:" ++ string_of_flexWrap(flexWrap)
+  | Order(int) => prefix_order(int)
   | JustifyContent(justifyContent) =>
     "justify-content:" ++ string_of_justifyContent(justifyContent)
   | AlignItems(alignItems) => "align-items:" ++ string_of_alignItems(alignItems)
@@ -1034,17 +1074,14 @@ let insertRule: string => unit = [%bs.raw
     }|}
 ];
 
-let base62_of_int = int => {
-  let symbols =
-    String.get(
-      "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    );
+let base62_of_int = (int) => {
+  let symbols = String.get("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
   let rec fn = (n, c) =>
     switch n {
     | 0 => c
     | _ => fn(n / 62, n - 62 * (n / 62) |> symbols |> Char.escaped) ++ c
     };
-  fn(abs(int), "");
+  fn(abs(int), "")
 };
 
 let insert = (nodes: list(atom), hash: string) =>
@@ -1053,8 +1090,11 @@ let insert = (nodes: list(atom), hash: string) =>
       nodes
       |> List.filter(((_scope, styles)) => styles !== [])
       |> List.map(
-           ((scope, styles)) =>
-             string_of_scope(scope, hash, String.concat(";", List.map(string_of_style, styles)))
+           ((scope, styles)) => {
+             let retval =
+               string_of_scope(scope, hash, String.concat(";", List.map(string_of_style, styles)));
+             retval
+           }
          );
     List.map(insertRule, cssRules) |> ignore;
     Hashtbl.add(injected, nodes, true)
