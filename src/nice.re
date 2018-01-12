@@ -117,31 +117,35 @@ let string_of_overflow = overflow =>
   };
 
 type display =
-  | None
+  | None_
   | Block
   | Inline
   | InlineBlock
+  | InlineFlex
   | Flex;
 
 let string_of_display = (display: display) =>
   switch display {
-  | None => "none"
+  | None_ => "none"
   | Flex => "flex"
   | Block => "block"
   | Inline => "inline"
   | InlineBlock => "inline-block"
+  | InlineFlex => "inline-block"
   };
 
 type dimension =
   | Px(int)
   | Em(float)
-  | Percent(float);
+  | Percent(float)
+  | Calc(string);
 
 let string_of_dimension = value =>
   switch value {
   | Px(x) => string_of_int(x) ++ "px"
-  | Em(x) => Printf.sprintf("%f", x) ++ "em"
-  | Percent(x) => Printf.sprintf("%f", x) ++ "%"
+  | Em(x) => {j|$(x)|j} ++ "em"
+  | Percent(x) => {j|$(x)|j} ++ "%"
+  | Calc(x) => "calc(" ++ x ++ ")"
   };
 
 type flexBasis =
@@ -172,8 +176,8 @@ type angle =
 
 let string_of_angle = angle =>
   switch angle {
-  | Deg(x) => Printf.sprintf("%f", x) ++ "deg"
-  | Rad(x) => Printf.sprintf("%f", x) ++ "rad"
+  | Deg(x) => {j|$(x)|j} ++ "deg"
+  | Rad(x) => {j|$(x)|j} ++ "rad"
   };
 
 type transformStyle =
@@ -195,24 +199,19 @@ type transformStyle =
 
 let string_of_transform = transform =>
   switch transform {
-  | Perspective(float) => "perspective(" ++ Printf.sprintf("%f", float) ++ ")"
+  | Perspective(float) => "perspective(" ++ {j|$(float)|j} ++ ")"
   | Rotate(angle) => "rotate(" ++ string_of_angle(angle) ++ ")"
   | RotateX(angle) => "rotateX(" ++ string_of_angle(angle) ++ ")"
   | RotateY(angle) => "rotateY(" ++ string_of_angle(angle) ++ ")"
   | RotateZ(angle) => "rotateZ(" ++ string_of_angle(angle) ++ ")"
-  | Scale(float) => "scale(" ++ Printf.sprintf("%f", float) ++ ")"
-  | ScaleX(float) => "scaleX(" ++ Printf.sprintf("%f", float) ++ ")"
-  | ScaleY(float) => "scaleY(" ++ Printf.sprintf("%f", float) ++ ")"
-  | ScaleZ(float) => "scaleZ(" ++ Printf.sprintf("%f", float) ++ ")"
-  | Translate(x, y) =>
-    "translate("
-    ++ Printf.sprintf("%f", x)
-    ++ ", "
-    ++ Printf.sprintf("%f", y)
-    ++ ")"
-  | TranslateX(float) => "translateX(" ++ Printf.sprintf("%f", float) ++ ")"
-  | TranslateY(float) => "translateY(" ++ Printf.sprintf("%f", float) ++ ")"
-  | TranslateZ(float) => "translateZ(" ++ Printf.sprintf("%f", float) ++ ")"
+  | Scale(float) => "scale(" ++ {j|$(float)|j} ++ ")"
+  | ScaleX(float) => "scaleX(" ++ {j|$(float)|j} ++ ")"
+  | ScaleY(float) => "scaleY(" ++ {j|$(float)|j} ++ ")"
+  | ScaleZ(float) => "scaleZ(" ++ {j|$(float)|j} ++ ")"
+  | Translate(x, y) => "translate(" ++ {j|$(x)|j} ++ ", " ++ {j|$(y)|j} ++ ")"
+  | TranslateX(float) => "translateX(" ++ {j|$(float)|j} ++ ")"
+  | TranslateY(float) => "translateY(" ++ {j|$(float)|j} ++ ")"
+  | TranslateZ(float) => "translateZ(" ++ {j|$(float)|j} ++ ")"
   | SkewX(angle) => "skewX(" ++ string_of_angle(angle) ++ ")"
   | SkewY(angle) => "skewY(" ++ string_of_angle(angle) ++ ")"
   };
@@ -380,7 +379,7 @@ let string_of_color = color =>
     ++ ","
     ++ string_of_int(b)
     ++ ","
-    ++ Printf.sprintf("%f", a)
+    ++ {j|$(a)|j}
   | HSL(h, s, l) =>
     string_of_int(h) ++ "," ++ string_of_int(s) ++ "," ++ string_of_int(l)
   | HSLa(h, s, l, a) =>
@@ -390,7 +389,7 @@ let string_of_color = color =>
     ++ ","
     ++ string_of_int(l)
     ++ ","
-    ++ Printf.sprintf("%f", a)
+    ++ {j|$(a)|j}
   | Transparent => "transparent"
   | Aliceblue => "aliceblue"
   | Antiquewhite => "antiquewhite"
@@ -646,14 +645,14 @@ let string_of_textAlignVertical = textAlignVertical =>
   };
 
 type textDecorationLine =
-  | None
+  | None_
   | Underline
   | LineThrough
   | UnderlineLineThrough;
 
 let string_of_textDecorationLine = textDecorationLine =>
   switch textDecorationLine {
-  | None => "none"
+  | None_ => "none"
   | Underline => "underline"
   | LineThrough => "line-through"
   | UnderlineLineThrough => "underline line-through"
@@ -863,8 +862,8 @@ let string_of_style = style =>
   | ShadowColor(color) => "shadow-color:" ++ string_of_color(color)
   | ShadowOffset(width, height) =>
     "shadow-offset:" ++ string_of_int(width) ++ "," ++ string_of_int(height)
-  | ShadowOpacity(float) => "shadow-opacity:" ++ Printf.sprintf("%f", float)
-  | ShadowRadius(float) => "shadow-radius:" ++ Printf.sprintf("%f", float)
+  | ShadowOpacity(float) => "shadow-opacity:" ++ {j|$(float)|j}
+  | ShadowRadius(float) => "shadow-radius:" ++ {j|$(float)|j}
   /* transform styles */
   | Transform(transformStyles) =>
     "transform:"
@@ -891,23 +890,22 @@ let string_of_style = style =>
     "border-top-left-radius:" ++ string_of_dimension(dimension)
   | BorderStyle(borderStyle) =>
     "border-style:" ++ string_of_borderStyle(borderStyle)
-  | Opacity(float) => "opacity:" ++ Printf.sprintf("%f", float)
-  | Elevation(float) => "elevation:" ++ Printf.sprintf("%f", float)
+  | Opacity(float) => "opacity:" ++ {j|$(float)|j}
+  | Elevation(float) => "elevation:" ++ {j|$(float)|j}
   /* text styles */
   | Color(color) => "color:" ++ string_of_color(color)
   | FontFamily(string) => "font-family:" ++ string
-  | FontSize(float) => "font-size:" ++ Printf.sprintf("%f", float)
+  | FontSize(float) => "font-size:" ++ {j|$(float)|j}
   | FontStyle(fontStyle) => "font-style:" ++ string_of_fontStyle(fontStyle)
   | FontWeight(fontWeight) =>
     "font-weight:" ++ string_of_fontWeight(fontWeight)
   | FontVariant(fontVariant) =>
     "font-variant:" ++ string_of_fontVariant(fontVariant)
   /* | TextShadowOffset(width, height) => "text-shadow-offset:" ++ Printf.sprintf("%f",width) */
-  | TextShadowRadius(float) =>
-    "text-shadow-radius:" ++ Printf.sprintf("%f", float)
+  | TextShadowRadius(float) => "text-shadow-radius:" ++ {j|$(float)|j}
   | TextShadowColor(color) => "text-shadow-color:" ++ string_of_color(color)
-  | LetterSpacing(float) => "letter-spacing:" ++ Printf.sprintf("%f", float)
-  | LineHeight(float) => "line-height:" ++ Printf.sprintf("%f", float)
+  | LetterSpacing(float) => "letter-spacing:" ++ {j|$(float)|j}
+  | LineHeight(float) => "line-height:" ++ {j|$(float)|j}
   | TextAlign(textAlign) => "text-align:" ++ string_of_textAlign(textAlign)
   | TextAlignVertical(textAlignVertical) =>
     "text-align-vertical:" ++ string_of_textAlignVertical(textAlignVertical)
@@ -1066,6 +1064,9 @@ let injected = Hashtbl.create(100);
 /* todo - server/native */
 let insertRule: string => unit = [%bs.raw
   {|function(rule){
+    if(typeof window === "undefined"){
+      return
+    }
       var tag = document.querySelector('style[data-nice]');
       if(!tag){
         tag = document.createElement('style');
@@ -1080,15 +1081,16 @@ let insertRule: string => unit = [%bs.raw
     }|}
 ];
 
+let flush = () => Hashtbl.reset(injected);
+
+let symbols =
+  String.get("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+
 let base62_of_int = int => {
-  let symbols =
-    String.get(
-      "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    );
   let rec fn = (n, c) =>
     switch n {
     | 0 => c
-    | _ => fn(n / 62, n - 62 * (n / 62) |> symbols |> Char.escaped) ++ c
+    | _ => fn(n / 62, n - 62 * (n / 62) |> symbols |> Char.escaped) ++ c /* todo - collect in list and concat at end */
     };
   fn(abs(int), "");
 };

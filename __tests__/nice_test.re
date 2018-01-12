@@ -1,3 +1,10 @@
 open Jest;
 
-describe("Expect", () => Expect.(test("toBe", () => expect(1 + 2) |> toBe(3))));
+open Expect;
+
+/* open Nice; */
+describe("Nice", () =>
+  test("toBe", () =>
+    expect(1 + 2) |> toMatchSnapshot
+  )
+);

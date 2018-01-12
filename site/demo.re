@@ -16,13 +16,16 @@ let className =
             FontWeight(Bold),
             Overflow(Hidden),
             Supports("(display: flex)", [Color(Blue)]),
-            Select(":hover", [Color(Red), Display(Block), Select(".ie6 &", [Color(Blue)])])
+            Select(
+              ":hover",
+              [Color(Red), Display(Block), Select(".ie6 &", [Color(Blue)])]
+            )
           ]
         )
       ]
     )
   ]);
 
+/* let className = css([Width(Em(2.))]); */
 Js.log(className);
-
-global("html, body", [Display(Block), Color(Green)]);
+/* global("html, body", [Display(Block), Color(Green)]); */
