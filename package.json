@@ -1,6 +1,6 @@
 {
   "name": "bs-nice",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "css-in-reason",
   "scripts": {
     "build": "bsb -make-world",
