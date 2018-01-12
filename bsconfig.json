@@ -15,7 +15,7 @@
   ],
   "bs-dependencies": [],
   "bs-dev-dependencies": ["bs-jest"],
-  "namespace": false,
+  "namespace": true,
   "package-specs": ["commonjs", "es6"],
   "refmt": 3
 }
