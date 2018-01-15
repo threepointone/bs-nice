@@ -1,6 +1,6 @@
 open Nice;
 
-let className =
+let cls1 =
   css([
     Display(Flex),
     Color(Red),
@@ -26,6 +26,10 @@ let className =
     )
   ]);
 
-/* let className = css([Width(Em(2.))]); */
-Js.log(className);
+let cls2 = css([Width(Em(4.4))]);
+
+global("html, body", [Color(Red)]);
+
+/* Js.log(extract("<div class='" ++ cls2 ++ "'>sdfsdf</div>")); */
+Js.log(cls1);
 /* global("html, body", [Display(Block), Color(Green)]); */

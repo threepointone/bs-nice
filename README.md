@@ -29,5 +29,4 @@ let className = css([
 * font-faces
 * better types
 * ~ hot reloading
-* 'server' side
 * benchmarks / tests

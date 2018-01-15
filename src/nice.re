@@ -1166,15 +1166,37 @@ let animation = _decls => ();
 
 let fontFace = _decls => ();
 
-let rehydrate = _ids => ();
-
 type extracted = {
   css: list(string),
-  ids: list(string)
+  ids: array(string)
 };
 
+let extractIDs: string => array(string) = [%bs.raw
+  {|
+  function (html){
+    let regex = /css\-([a-zA-Z0-9\-_]+)/gm
+    let match, ids = new Set();
+    while((match = regex.exec(html)) !== null) {
+      ids.add("." + match[0]);
+    }
+    return Array.from(ids.values());
+  }
+  |}
+];
+
 /* grep out .css-<id>, return css and ids */
-let extract = _html => {css: [], ids: []};
+let extract = _html => {
+  let ids = extractIDs(_html);
+  let css = ref([]);
+  Array.iter(
+    id => css := List.concat([Hashtbl.find(rule_cache, id), css^]),
+    ids
+  );
+  {css: css^, ids};
+};
+
+let rehydrate = ids =>
+  Array.iter(id => Hashtbl.add(injected_cache, id, true), ids);
 
 module Presets = {
   let mobile = "(min-width:400px)";

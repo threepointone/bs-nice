@@ -28,3 +28,34 @@ Array [
   0,
 ]
 `;
+
+exports[`Nice nesting 1`] = `
+Array [
+  "css-1cUkzM",
+  Array [
+    Array [
+      ".css-1cUkzM",
+      Array [
+        ".css-1cUkzM{display:flex;color:red}",
+        Array [
+          "@media screen{.css-1cUkzM{display:block;color:green}}",
+          Array [
+            "@media screen{.css-1cUkzM:hover{color:orange;font-weight:bold;overflow:hidden}}",
+            Array [
+              "@media screen{@supports (display: flex){.css-1cUkzM:hover{color:blue}}}",
+              Array [
+                "@media screen{.css-1cUkzM:hover:active{color:red;display:block}}",
+                Array [
+                  "@media screen{.ie6 .css-1cUkzM:hover:active{color:blue}}",
+                  0,
+                ],
+              ],
+            ],
+          ],
+        ],
+      ],
+    ],
+    0,
+  ],
+]
+`;
