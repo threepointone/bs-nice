@@ -1188,6 +1188,9 @@ let extractIDs: string => array(string) = [%bs.raw
 let extract = _html => {
   let ids = extractIDs(_html);
   let css = ref([]);
+  /* add all global rules  */
+  Hashtbl.iter((_k, v) => css := List.concat([v, css^]), global_cache);
+  /* add rules matching ids  */
   Array.iter(
     id => css := List.concat([Hashtbl.find(rule_cache, id), css^]),
     ids
