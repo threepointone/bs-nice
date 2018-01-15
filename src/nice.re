@@ -1145,9 +1145,6 @@ let global = (select, decls) => {
     };
     Hashtbl.add(injected_cache, hash, true);
   };
-  /* todo -  insert() expects select to be a hash,
-     causing issues when inserting global rules
-     for same selector but different values */
 };
 
 let raw = css => {

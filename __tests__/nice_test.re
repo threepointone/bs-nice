@@ -12,10 +12,10 @@ let serialized_global_cache = () =>
 
 describe("Nice", () => {
   afterEach(flush);
-  test("css", () => {
-    let cls = css([Display(Flex), Width(Px(23))]);
-    expect((cls, serialized_rule_cache())) |> toMatchSnapshot;
-  });
+  test("css", () =>
+    expect((css([Display(Flex), Width(Px(23))]), serialized_rule_cache()))
+    |> toMatchSnapshot
+  );
   test("global", () => {
     global("html, body", [Padding(Px(20))]);
     expect(serialized_global_cache()) |> toMatchSnapshot;
