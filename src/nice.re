@@ -1,6 +1,9 @@
 let isBrowser =
   [%bs.raw {| typeof window !== 'undefined' |}] === Js.true_ ? true : false;
 
+let isTest =
+  [%bs.raw {| process.env.NODE_ENV === 'test' |}] === Js.true_ ? true : false;
+
 type position =
   | Absolute
   | Relative
@@ -1051,6 +1054,8 @@ let group = (normalized: list((scope, style))) : list(atom) => {
 
 let flatten = decls => group(walk(decls, blankScope));
 
+let global_cache = Hashtbl.create(100);
+
 let injected_cache = Hashtbl.create(100);
 
 let rule_cache = Hashtbl.create(100);
@@ -1093,7 +1098,7 @@ let base62_of_int = int => {
 };
 
 let insert = (nodes: list(atom), hash: string) =>
-  if (Hashtbl.mem(injected_cache, nodes) === false) {
+  if (Hashtbl.mem(injected_cache, hash) === false) {
     let cssRules =
       nodes
       |> List.filter(((_scope, styles)) => styles !== [])
@@ -1104,12 +1109,12 @@ let insert = (nodes: list(atom), hash: string) =>
              String.concat(";", List.map(string_of_style, styles))
            )
          );
-    if (isBrowser) {
+    if (isBrowser && ! isTest) {
       List.map(insertRule, cssRules) |> ignore;
     } else {
       Hashtbl.add(rule_cache, hash, cssRules);
     };
-    Hashtbl.add(injected_cache, nodes, true);
+    Hashtbl.add(injected_cache, hash, true);
   };
 
 let css = decls => {
@@ -1121,8 +1126,41 @@ let css = decls => {
 
 let global = (select, decls) => {
   let flattened = flatten(decls);
-  insert(flattened, select);
-  ();
+  let hash = ".raw-" ++ base62_of_int(Hashtbl.hash(flattened));
+  if (Hashtbl.mem(injected_cache, hash) === false) {
+    let cssRules =
+      flattened
+      |> List.filter(((_scope, styles)) => styles !== [])
+      |> List.map(((scope, styles)) =>
+           string_of_scope(
+             scope,
+             select,
+             String.concat(";", List.map(string_of_style, styles))
+           )
+         );
+    if (isBrowser && ! isTest) {
+      List.map(insertRule, cssRules) |> ignore;
+    } else {
+      Hashtbl.add(global_cache, hash, cssRules);
+    };
+    Hashtbl.add(injected_cache, hash, true);
+  };
+  /* todo -  insert() expects select to be a hash,
+     causing issues when inserting global rules
+     for same selector but different values */
+};
+
+let raw = css => {
+  /*  this hash in not inserted anywhere in the css */
+  let hash = ".raw-" ++ base62_of_int(Hashtbl.hash(css));
+  if (Hashtbl.mem(injected_cache, hash) === false) {
+    Hashtbl.add(injected_cache, hash, true);
+    if (isBrowser && ! isTest) {
+      insertRule(css);
+    } else {
+      Hashtbl.add(global_cache, hash, [css]);
+    };
+  };
 };
 
 let keyframes = _steps => ();
@@ -1133,7 +1171,13 @@ let fontFace = _decls => ();
 
 let rehydrate = _ids => ();
 
-let extract: string => list(string) = _html => [];
+type extracted = {
+  css: list(string),
+  ids: list(string)
+};
+
+/* grep out .css-<id>, return css and ids */
+let extract = _html => {css: [], ids: []};
 
 module Presets = {
   let mobile = "(min-width:400px)";

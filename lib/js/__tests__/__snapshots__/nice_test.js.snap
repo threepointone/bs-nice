@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Nice css 1`] = `
+Array [
+  "css-1lqfuW",
+  Array [
+    Array [
+      ".css-1lqfuW",
+      Array [
+        ".css-1lqfuW{display:flex;width:23px}",
+        0,
+      ],
+    ],
+    0,
+  ],
+]
+`;
+
+exports[`Nice global 1`] = `
+Array [
+  Array [
+    ".raw-24eOUU",
+    Array [
+      "html, body{padding:20px}",
+      0,
+    ],
+  ],
+  0,
+]
+`;
