@@ -1,16 +1,18 @@
+let isBrowser =
+  [%bs.raw {| typeof window !== 'undefined' |}] === Js.true_ ? true : false;
+
 type position =
   | Absolute
   | Relative
   | Sticky
   | Fixed;
 
-let string_of_position = position =>
-  switch position {
+let string_of_position =
+  fun
   | Absolute => "absolute"
   | Relative => "relative"
   | Sticky => "sticky"
-  | Fixed => "fixed"
-  };
+  | Fixed => "fixed";
 
 type flexDirection =
   | Row
@@ -18,23 +20,21 @@ type flexDirection =
   | Column
   | ColumnReverse;
 
-let string_of_flexDirection = direction =>
-  switch direction {
+let string_of_flexDirection =
+  fun
   | Row => "row"
   | RowReverse => "row-reverse"
   | Column => "column"
-  | ColumnReverse => "column-reverse"
-  };
+  | ColumnReverse => "column-reverse";
 
 type flexWrap =
   | Wrap
   | NoWrap;
 
-let string_of_flexWrap = wrap =>
-  switch wrap {
+let string_of_flexWrap =
+  fun
   | Wrap => "wrap"
-  | NoWrap => "nowrap"
-  };
+  | NoWrap => "nowrap";
 
 type justifyContent =
   | FlexStart
@@ -43,14 +43,13 @@ type justifyContent =
   | SpaceBetween
   | SpaceAround;
 
-let string_of_justifyContent = justify =>
-  switch justify {
+let string_of_justifyContent =
+  fun
   | FlexStart => "flex-start"
   | FlexEnd => "flex-end"
   | Center => "center"
   | SpaceBetween => "space-between"
-  | SpaceAround => "space-around"
-  };
+  | SpaceAround => "space-around";
 
 type alignItems =
   | FlexStart
@@ -59,14 +58,13 @@ type alignItems =
   | Stretch
   | Baseline;
 
-let string_of_alignItems = align =>
-  switch align {
+let string_of_alignItems =
+  fun
   | FlexStart => "flex-start"
   | FlexEnd => "flex-end"
   | Center => "center"
   | Stretch => "stretch"
-  | Baseline => "baseline"
-  };
+  | Baseline => "baseline";
 
 type alignSelf =
   | Auto
@@ -76,45 +74,62 @@ type alignSelf =
   | Stretch
   | Baseline;
 
-let string_of_alignSelf = align =>
-  switch align {
+let string_of_alignSelf =
+  fun
   | Auto => "auto"
   | FlexStart => "flex-start"
   | FlexEnd => "flex-end"
   | Center => "center"
   | Stretch => "stretch"
-  | Baseline => "baseline"
-  };
+  | Baseline => "baseline";
 
 type alignContent =
+  | Start
+  | End
   | FlexStart
   | FlexEnd
+  | Left
+  | Right
   | Center
   | Stretch
   | SpaceBetween
-  | SpaceAround;
+  | SpaceAround
+  | Baseline
+  | FirstBaseline
+  | LastBaseline
+  | SpaceEvenly
+  | SafeCenter
+  | UnsafeCenter;
 
-let string_of_alignContent = align =>
-  switch align {
+let string_of_alignContent =
+  fun
+  | Start => "start"
+  | End => "end"
   | FlexStart => "flex-start"
   | FlexEnd => "flex-end"
+  | Left => "left"
+  | Right => "right"
   | Center => "center"
   | Stretch => "stretch"
   | SpaceBetween => "space-between"
   | SpaceAround => "space-around"
-  };
+  | Baseline => "baseline"
+  | FirstBaseline => "first baseline"
+  | LastBaseline => "last baseline"
+  | SpaceEvenly => "space-evenly"
+  | SafeCenter => "safe-center"
+  | UnsafeCenter => "unsafe-center";
 
 type overflow =
   | Visible
   | Hidden
   | Scroll;
 
-let string_of_overflow = overflow =>
-  switch overflow {
+let string_of_overflow =
+  fun
   | Visible => "visible"
   | Hidden => "hidden"
-  | Scroll => "scroll"
-  };
+  | Scroll => "scroll";
 
 type display =
   | None_
@@ -124,15 +139,14 @@ type display =
   | InlineFlex
   | Flex;
 
-let string_of_display = (display: display) =>
-  switch display {
+let string_of_display =
+  fun
   | None_ => "none"
   | Flex => "flex"
   | Block => "block"
   | Inline => "inline"
   | InlineBlock => "inline-block"
-  | InlineFlex => "inline-block"
-  };
+  | InlineFlex => "inline-block";
 
 type dimension =
   | Px(int)
@@ -140,45 +154,36 @@ type dimension =
   | Percent(float)
   | Calc(string);
 
-let string_of_dimension = value =>
-  switch value {
-  | Px(x) => string_of_int(x) ++ "px"
-  | Em(x) => {j|$(x)|j} ++ "em"
-  | Percent(x) => {j|$(x)|j} ++ "%"
-  | Calc(x) => "calc(" ++ x ++ ")"
-  };
+let string_of_dimension =
+  fun
+  | Px(x) => {j|$(x)px|j}
+  | Em(x) => {j|$(x)em|j}
+  | Percent(x) => {j|$(x)%|j}
+  | Calc(x) => "calc(" ++ x ++ ")";
 
 type flexBasis =
   | Auto
   | MaxContent
   | MinContent
   | FitContent
-  | Content
-  | Inherit
-  | Initital
-  | Unset;
+  | Content;
 
-let string_of_flexBasis = basis =>
-  switch basis {
+let string_of_flexBasis =
+  fun
   | Auto => "auto"
   | MaxContent => "max-content"
   | MinContent => "min-content"
   | FitContent => "fit-content"
-  | Content => "content"
-  | Inherit => "inherit"
-  | Initital => "initital"
-  | Unset => "unset"
-  };
+  | Content => "content";
 
 type angle =
   | Deg(float)
   | Rad(float);
 
-let string_of_angle = angle =>
-  switch angle {
-  | Deg(x) => {j|$(x)|j} ++ "deg"
-  | Rad(x) => {j|$(x)|j} ++ "rad"
-  };
+let string_of_angle =
+  fun
+  | Deg(x) => {j|$(x)deg|j}
+  | Rad(x) => {j|$(x)rad|j};
 
 type transformStyle =
   | Perspective(float)
@@ -197,9 +202,9 @@ type transformStyle =
   | SkewX(angle)
   | SkewY(angle);
 
-let string_of_transform = transform =>
-  switch transform {
-  | Perspective(float) => "perspective(" ++ {j|$(float)|j} ++ ")"
+let string_of_transform =
+  fun
+  | Perspective(float) => {j|perspective($(float))|j}
   | Rotate(angle) => "rotate(" ++ string_of_angle(angle) ++ ")"
   | RotateX(angle) => "rotateX(" ++ string_of_angle(angle) ++ ")"
   | RotateY(angle) => "rotateY(" ++ string_of_angle(angle) ++ ")"
@@ -213,8 +218,7 @@ let string_of_transform = transform =>
   | TranslateY(float) => "translateY(" ++ {j|$(float)|j} ++ ")"
   | TranslateZ(float) => "translateZ(" ++ {j|$(float)|j} ++ ")"
   | SkewX(angle) => "skewX(" ++ string_of_angle(angle) ++ ")"
-  | SkewY(angle) => "skewY(" ++ string_of_angle(angle) ++ ")"
-  };
+  | SkewY(angle) => "skewY(" ++ string_of_angle(angle) ++ ")";
 
 type color =
   | RGB(int, int, int)
@@ -368,28 +372,12 @@ type color =
   | Yellow
   | Yellowgreen;
 
-let string_of_color = color =>
-  switch color {
-  | RGB(r, g, b) =>
-    string_of_int(r) ++ "," ++ string_of_int(g) ++ "," ++ string_of_int(b)
-  | RGBa(r, g, b, a) =>
-    string_of_int(r)
-    ++ ","
-    ++ string_of_int(g)
-    ++ ","
-    ++ string_of_int(b)
-    ++ ","
-    ++ {j|$(a)|j}
-  | HSL(h, s, l) =>
-    string_of_int(h) ++ "," ++ string_of_int(s) ++ "," ++ string_of_int(l)
-  | HSLa(h, s, l, a) =>
-    string_of_int(h)
-    ++ ","
-    ++ string_of_int(s)
-    ++ ","
-    ++ string_of_int(l)
-    ++ ","
-    ++ {j|$(a)|j}
+let string_of_color =
+  fun
+  | RGB(r, g, b) => {j|rgba($(r),$(g),$(b)|j}
+  | RGBa(r, g, b, a) => {j|rgba($(r),$(g),$(b),$(a))|j}
+  | HSL(h, s, l) => {j|hsl($(h),$(s),$(l)|j}
+  | HSLa(h, s, l, a) => {j|hsla($(h),$(s),$(l),$(a)|j}
   | Transparent => "transparent"
   | Aliceblue => "aliceblue"
   | Antiquewhite => "antiquewhite"
@@ -535,8 +523,7 @@ let string_of_color = color =>
   | White => "white"
   | Whitesmoke => "whitesmoke"
   | Yellow => "yellow"
-  | Yellowgreen => "yellowgreen"
-  };
+  | Yellowgreen => "yellowgreen";
 
 type fontWeight =
   | Normal
@@ -551,8 +538,8 @@ type fontWeight =
   | W800
   | W900;
 
-let string_of_fontWeight = weight =>
-  switch weight {
+let string_of_fontWeight =
+  fun
   | Normal => "normal"
   | Bold => "bold"
   | W100 => "100"
@@ -563,40 +550,36 @@ let string_of_fontWeight = weight =>
   | W600 => "600"
   | W700 => "700"
   | W800 => "800"
-  | W900 => "900"
-  };
+  | W900 => "900";
 
 type backfaceVisibilty =
   | Visible
   | Hidden;
 
-let string_of_backfaceVisibilty = backfaceVisibilty =>
-  switch backfaceVisibilty {
+let string_of_backfaceVisibilty =
+  fun
   | Visible => "visible"
-  | Hidden => "hidden"
-  };
+  | Hidden => "hidden";
 
 type borderStyle =
   | Solid
   | Dotted
   | Dashed;
 
-let string_of_borderStyle = borderStyle =>
-  switch borderStyle {
+let string_of_borderStyle =
+  fun
   | Solid => "solid"
   | Dotted => "dotted"
-  | Dashed => "dashed"
-  };
+  | Dashed => "dashed";
 
 type fontStyle =
   | Normal
   | Italic;
 
-let string_of_fontStyle = fontStyle =>
-  switch fontStyle {
+let string_of_fontStyle =
+  fun
   | Normal => "normal"
-  | Italic => "italic"
-  };
+  | Italic => "italic";
 
 type fontVariant =
   | SmallCaps
@@ -605,14 +588,13 @@ type fontVariant =
   | TabularNums
   | ProportionalNums;
 
-let string_of_fontVariant = fontVariant =>
-  switch fontVariant {
+let string_of_fontVariant =
+  fun
   | SmallCaps => "small-caps"
   | OldStyleNums => "old-style-nums"
   | LiningNums => "lining-nums"
   | TabularNums => "tabular-nums"
-  | ProportionalNums => "proportional-nums"
-  };
+  | ProportionalNums => "proportional-nums";
 
 type textAlign =
   | Auto
@@ -621,14 +603,13 @@ type textAlign =
   | Center
   | Justify;
 
-let string_of_textAlign = textAlign =>
-  switch textAlign {
+let string_of_textAlign =
+  fun
   | Auto => "auto"
   | Left => "left"
   | Right => "right"
   | Center => "center"
-  | Justify => "justify"
-  };
+  | Justify => "justify";
 
 type textAlignVertical =
   | Auto
@@ -636,13 +617,12 @@ type textAlignVertical =
   | Bottom
   | Center;
 
-let string_of_textAlignVertical = textAlignVertical =>
-  switch textAlignVertical {
+let string_of_textAlignVertical =
+  fun
   | Auto => "auto"
   | Top => "top"
   | Bottom => "bottom"
-  | Center => "center"
-  };
+  | Center => "center";
 
 type textDecorationLine =
   | None_
@@ -650,13 +630,12 @@ type textDecorationLine =
   | LineThrough
   | UnderlineLineThrough;
 
-let string_of_textDecorationLine = textDecorationLine =>
-  switch textDecorationLine {
+let string_of_textDecorationLine =
+  fun
   | None_ => "none"
   | Underline => "underline"
   | LineThrough => "line-through"
-  | UnderlineLineThrough => "underline line-through"
-  };
+  | UnderlineLineThrough => "underline line-through";
 
 type textDecorationStyle =
   | Solid
@@ -664,25 +643,23 @@ type textDecorationStyle =
   | Dotted
   | Dashed;
 
-let string_of_textDecorationStyle = textDecorationStyle =>
-  switch textDecorationStyle {
+let string_of_textDecorationStyle =
+  fun
   | Solid => "solid"
   | Double => "double"
   | Dotted => "dotted"
-  | Dashed => "dashed"
-  };
+  | Dashed => "dashed";
 
 type writingDirection =
   | Auto
   | Ltr
   | Rtl;
 
-let string_of_writingDirection = writingDirection =>
-  switch writingDirection {
+let string_of_writingDirection =
+  fun
   | Auto => "auto"
   | Ltr => "ltr"
-  | Rtl => "rtl"
-  };
+  | Rtl => "rtl";
 
 type resizeMode =
   | Contain
@@ -691,15 +668,17 @@ type resizeMode =
   | Center
   | Repeat;
 
-let string_of_resizeMode = resizeMode =>
-  switch resizeMode {
+let string_of_resizeMode =
+  fun
   | Contain => "contain"
   | Cover => "cover"
   | Stretch => "stretch"
   | Center => "center"
-  | Repeat => "repeat"
-  };
+  | Repeat => "repeat";
 
+/* additive-symbols
+
+   */
 type style =
   /* layout styles */
   | Display(display)
@@ -775,7 +754,7 @@ type style =
   | FontStyle(fontStyle)
   | FontWeight(fontWeight)
   | FontVariant(fontVariant)
-  | TextShadowOffset(float, float)
+  /* | TextShadowOffset(float, float) */
   | TextShadowRadius(float)
   | TextShadowColor(color)
   | LetterSpacing(float)
@@ -793,13 +772,17 @@ type style =
   /* at rules */
   | MediaQuery(string, ruleset)
   | Supports(string, ruleset)
+  /* selectors */
   | Select(string, ruleset)
   /* escape hatch */
+  | Unset(string)
+  | Initial(string)
+  | Inherit(string)
   | Raw(string, string)
 and ruleset = list(style);
 
-let string_of_style = style =>
-  switch style {
+let string_of_style =
+  fun
   | Display(display) => "display:" ++ string_of_display(display)
   | Width(dimension) => "width:" ++ string_of_dimension(dimension)
   | Height(dimension) => "height:" ++ string_of_dimension(dimension)
@@ -922,9 +905,19 @@ let string_of_style = style =>
   | OverlayColor(color) => "overlay-color" ++ string_of_color(color)
   /* escape hatch */
   | Raw(key, value) => key ++ ":" ++ value
-  /* at-rules handled before they get here */
-  | _ => raise(Not_found)
-  };
+  | Unset(string) => string ++ ":unset"
+  | Initial(string) => string ++ ":initial"
+  | Inherit(string) => string ++ ":inherit"
+  /* should never get here  */
+  | MediaQuery(_, _)
+  | Select(_, _)
+  | Supports(_, _) => raise(Not_found);
+
+/* at-rules handled before they get here */
+/* | _ => raise(Not_found); */
+let selectorTokenizer = [%bs.re
+  {|/[(),]|"(?:\\.|[^"\n])*"|'(?:\\.|[^'\n])*'|\/\*[\s\S]*?\*\//g|}
+];
 
 /* todo - rewrite in pure reason */
 let splitSelector: string => array(string) = [%bs.raw
@@ -1058,7 +1051,14 @@ let group = (normalized: list((scope, style))) : list(atom) => {
 
 let flatten = decls => group(walk(decls, blankScope));
 
-let injected = Hashtbl.create(100);
+let injected_cache = Hashtbl.create(100);
+
+let rule_cache = Hashtbl.create(100);
+
+let flush = () => {
+  Hashtbl.reset(injected_cache);
+  Hashtbl.reset(rule_cache);
+};
 
 /* todo - server/node  */
 /* todo - server/native */
@@ -1074,29 +1074,26 @@ let insertRule: string => unit = [%bs.raw
         document.head.appendChild(tag);
       }
       if(process.env.NODE_ENV === 'production'){
-        tag.sheet.insertRule(rule, tag.sheet.cssRules.length);
+
       } else {
         tag.appendChild(document.createTextNode(rule));
       }
     }|}
 ];
 
-let flush = () => Hashtbl.reset(injected);
-
-let symbols =
-  String.get("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+let alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 let base62_of_int = int => {
   let rec fn = (n, c) =>
     switch n {
     | 0 => c
-    | _ => fn(n / 62, n - 62 * (n / 62) |> symbols |> Char.escaped) ++ c /* todo - collect in list and concat at end */
+    | _ => fn(n / 62, n - 62 * (n / 62) |> String.get(alphabet) |> Char.escaped) ++ c /* todo - collect in list and concat at end */
     };
   fn(abs(int), "");
 };
 
 let insert = (nodes: list(atom), hash: string) =>
-  if (Hashtbl.mem(injected, nodes) === false) {
+  if (Hashtbl.mem(injected_cache, nodes) === false) {
     let cssRules =
       nodes
       |> List.filter(((_scope, styles)) => styles !== [])
@@ -1107,8 +1104,12 @@ let insert = (nodes: list(atom), hash: string) =>
              String.concat(";", List.map(string_of_style, styles))
            )
          );
-    List.map(insertRule, cssRules) |> ignore;
-    Hashtbl.add(injected, nodes, true);
+    if (isBrowser) {
+      List.map(insertRule, cssRules) |> ignore;
+    } else {
+      Hashtbl.add(rule_cache, hash, cssRules);
+    };
+    Hashtbl.add(injected_cache, nodes, true);
   };
 
 let css = decls => {

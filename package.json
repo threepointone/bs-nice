@@ -7,7 +7,7 @@
     "start": "bsb -make-world -w",
     "clean": "bsb -clean-world",
     "site": "parcel site/index.html",
-    "size": "rollup -c rollup.config.js | uglifyjs -mc | gzip | wc -c"
+    "size": "rollup -c rollup.config.js | google-closure-compiler-js | gzip | wc -c"
   },
   "keywords": [
     "reason",
@@ -21,6 +21,7 @@
   "devDependencies": {
     "bs-jest": "^0.3.2",
     "bs-platform": "2.1.0",
+    "google-closure-compiler-js": "^20180101.0.0",
     "parcel-bundler": "^1.2.1",
     "rollup": "^0.54.0",
     "rollup-plugin-node-resolve": "^3.0.0"

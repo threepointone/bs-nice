@@ -24,9 +24,9 @@ let className = css([
 
 ## todo
 
+* vendor prefixing
 * keyframes / animations
 * font-faces
-* vendor prefixing
 * better types
 * ~ hot reloading
 * 'server' side

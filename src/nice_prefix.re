@@ -11,8 +11,8 @@
    transition  */
 open Nice;
 
-let flex = style =>
-  switch style {
+let flex =
+  fun
   | Display(Flex) =>
     List.map(
       x => Raw("display", x),
@@ -29,6 +29,5 @@ let flex = style =>
         "inline-flex"
       ]
     )
-  | _ => [style]
-  };
+  | x => [x];
 /* let flexBoxIE = style => */

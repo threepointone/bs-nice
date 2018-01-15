@@ -2,9 +2,12 @@ open Jest;
 
 open Expect;
 
-/* open Nice; */
+open Nice;
+
 describe("Nice", () =>
-  test("toBe", () =>
-    expect(1 + 2) |> toMatchSnapshot
-  )
+  test("toBe", () => {
+    let cls = css([Display(Flex)]);
+    expect(rule_cache) |> toMatchSnapshot |> ignore;
+    expect(cls) |> toMatchSnapshot;
+  })
 );
