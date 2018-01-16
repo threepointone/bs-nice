@@ -953,7 +953,7 @@ let splitSelector: string => array(string) = [%bs.raw
 let replacementRegex = Js.Re.fromStringWithFlags("&", ~flags="g");
 
 let replace = (str, _with) =>
-  Js.String.replaceByRe(replacementRegex, str, _with);
+  Js.String.replaceByRe(replacementRegex, _with, str);
 
 let joinSelectors = selectors => {
   let rec joinSelectors = selectors =>
@@ -964,12 +964,14 @@ let joinSelectors = selectors => {
     | [h, ...t] => replace(h, joinSelectors(t))
     };
   joinSelectors(
-    List.flatten(
-      List.map(
-        selector =>
-          Array.to_list(splitSelector(selector))
-          |> List.map(a => String.contains(a, '&') ? a : "&" ++ a),
-        selectors
+    List.rev(
+      List.flatten(
+        List.map(
+          selector =>
+            Array.to_list(splitSelector(selector))
+            |> List.map(a => String.contains(a, '&') ? a : "&" ++ a),
+          selectors
+        )
       )
     )
   );
