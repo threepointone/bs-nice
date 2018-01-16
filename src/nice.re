@@ -957,7 +957,7 @@ let replace = (str, _with) =>
 
 let joinSelectors = selectors => {
   let rec joinSelectors = selectors =>
-    switch (selectors) {
+    switch selectors {
     | [] => ""
     | [x] => x
     | [x, y] => replace(x, y)
@@ -965,11 +965,12 @@ let joinSelectors = selectors => {
     };
   joinSelectors(
     List.flatten(
-      List.map(selector => 
-               Array.to_list(splitSelector(selector))
-                 |> List.map(a => String.contains(a, '&') ? a : "&" ++ a), 
-               selectors
-              )
+      List.map(
+        selector =>
+          Array.to_list(splitSelector(selector))
+          |> List.map(a => String.contains(a, '&') ? a : "&" ++ a),
+        selectors
+      )
     )
   );
 };
@@ -1004,33 +1005,61 @@ let blankScope = {mqs: [], supps: [], selectors: ["&"]};
 
 let rec walk = (decls, idx, scope, acc) =>
   if (Array.length(decls) - idx == 0) {
-    acc
+    acc;
   } else {
-      switch decls[Array.length(decls) - idx - 1] {
-      | MediaQuery(q, ruleset) =>
-        walk(decls, idx+1, scope, walk(ruleset, 0, {...scope, mqs: List.concat([scope.mqs, [q]])}, acc))
-      | Supports(s, ruleset) =>
-        walk(decls, idx+1, scope, walk(ruleset, 0, {...scope, supps: List.concat([scope.supps, [s]])}, acc))
-      | Select(p, ruleset) =>
-          walk(decls, idx+1, scope, walk(ruleset, 0, {...scope, selectors: List.concat([scope.selectors, [p]])}, acc))
-      | x => walk(decls, idx+1, scope, [(scope, x), ...acc])
-      };
+    switch decls[Array.length(decls) - idx - 1] {
+    | MediaQuery(q, ruleset) =>
+      walk(
+        decls,
+        idx + 1,
+        scope,
+        walk(ruleset, 0, {...scope, mqs: List.concat([scope.mqs, [q]])}, acc)
+      )
+    | Supports(s, ruleset) =>
+      walk(
+        decls,
+        idx + 1,
+        scope,
+        walk(
+          ruleset,
+          0,
+          {...scope, supps: List.concat([scope.supps, [s]])},
+          acc
+        )
+      )
+    | Select(p, ruleset) =>
+      walk(
+        decls,
+        idx + 1,
+        scope,
+        walk(
+          ruleset,
+          0,
+          {...scope, selectors: List.concat([scope.selectors, [p]])},
+          acc
+        )
+      )
+    | x => walk(decls, idx + 1, scope, [(scope, x), ...acc])
+    };
   };
 
 type atom = (scope, list(style));
 
-let rec group = (normalized: list((scope, style))) : list(atom) => {
+let rec group = (normalized: list((scope, style))) : list(atom) =>
   switch normalized {
   | [] => []
-  | [(scope, style), ...t] => switch (group(t)) {
+  | [(scope, style), ...t] =>
+    switch (group(t)) {
     | [] => [(scope, [style])]
-    | [(lastScope, styles), ...t] when lastScope === scope => [(lastScope, [style, ...styles]), ...t]
+    | [(lastScope, styles), ...t] when lastScope === scope => [
+        (lastScope, [style, ...styles]),
+        ...t
+      ]
     | l => [(scope, [style]), ...l]
-  }
-  }
-};
+    }
+  };
 
-let flatten = (decls) => group(walk(decls, 0, blankScope, []));
+let flatten = decls => group(walk(decls, 0, blankScope, []));
 
 let global_cache = Hashtbl.create(100);
 
@@ -1043,31 +1072,51 @@ let flush = () => {
   Hashtbl.reset(rule_cache);
 };
 
-[@bs.val] external document: Dom.document = "document";
-[@bs.send] external querySelector: (Dom.document, string) => Js.Nullable.t(Dom.element) = "querySelector";
-[@bs.send] external createElement: (Dom.document, string) => Dom.element = "createElement";
-[@bs.send] external setAttribute: (Dom.element, string, string) => unit = "";
-[@bs.get] external head: (Dom.document) => Dom.element = "";
-[@bs.send] external appendChild: (Dom.element, Dom.element) => unit = "";
-[@bs.send] external insertCssRule: (Dom.cssStyleSheet, string, int) => unit = "insertRule";
-[@bs.get] external sheet: (Dom.element) => Dom.cssStyleSheet = "";
-[@bs.get] external cssRules: (Dom.cssStyleSheet) => Dom.cssStyleDeclaration = "";
-[@bs.get] external length: (Dom.cssStyleDeclaration) => int = "";
-[@bs.send] external createTextNode: (Dom.document, string) => Dom.element = "";
-[@bs.scope "process.env"] [@bs.val] external node_env: string = "NODE_ENV";
+[@bs.val] external document : Dom.document = "document";
+
+[@bs.send]
+external querySelector : (Dom.document, string) => Js.Nullable.t(Dom.element) =
+  "querySelector";
+
+[@bs.send]
+external createElement : (Dom.document, string) => Dom.element =
+  "createElement";
+
+[@bs.send] external setAttribute : (Dom.element, string, string) => unit = "";
+
+[@bs.get] external head : Dom.document => Dom.element = "";
+
+[@bs.send] external appendChild : (Dom.element, Dom.element) => unit = "";
+
+[@bs.send]
+external insertCssRule : (Dom.cssStyleSheet, string, int) => unit =
+  "insertRule";
+
+[@bs.get] external sheet : Dom.element => Dom.cssStyleSheet = "";
+
+[@bs.get]
+external cssRules : Dom.cssStyleSheet => Dom.cssStyleDeclaration = "";
+
+[@bs.get] external length : Dom.cssStyleDeclaration => int = "";
+
+[@bs.send]
+external createTextNode : (Dom.document, string) => Dom.element = "";
+
+[@bs.scope "process.env"] [@bs.val] external node_env : string = "NODE_ENV";
 
 /* todo - server/node  */
 /* todo - server/native */
-let insertRule = (rule) => {
-  let tag = switch (Js.Nullable.to_opt(querySelector(document, "style[data-nice]"))) {
-    | None => 
+let insertRule = rule => {
+  let tag =
+    switch (Js.Nullable.to_opt(querySelector(document, "style[data-nice]"))) {
+    | None =>
       let tag = createElement(document, "style");
       setAttribute(tag, "data-nice", "");
       appendChild(document |> head, tag);
-      tag
+      tag;
     | Some(tag) => tag
-  };
-  if(node_env === "production"){
+    };
+  if (node_env === "production") {
     insertCssRule(tag |> sheet, rule, tag |> sheet |> cssRules |> length);
   } else {
     appendChild(tag, createTextNode(document, rule));

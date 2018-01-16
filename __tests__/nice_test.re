@@ -2,13 +2,13 @@ open Jest;
 
 open Expect;
 
-open Nice;
-
 let serialized_rule_cache = () =>
   Hashtbl.fold((k, v, acc) => [(k, v), ...acc], Nice.rule_cache, []);
 
 let serialized_global_cache = () =>
   Hashtbl.fold((k, v, acc) => [(k, v), ...acc], Nice.global_cache, []);
+
+open! Nice;
 
 describe("Nice", () => {
   afterEach(flush);
@@ -35,7 +35,11 @@ describe("Nice", () => {
                 Supports("(display: flex)", [|Color(Blue)|]),
                 Select(
                   ":active",
-                  [|Color(Red), Display(Block), Select(".ie6 &", [|Color(Blue)|])|]
+                  [|
+                    Color(Red),
+                    Display(Block),
+                    Select(".ie6 &", [|Color(Blue)|])
+                  |]
                 )
               |]
             )
