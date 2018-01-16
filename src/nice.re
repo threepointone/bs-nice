@@ -985,13 +985,16 @@ let string_of_scope = (scope: scope, hash: string, content: string) => {
   let prefix = ref("");
   let suffix = ref("");
   if (List.length(scope.mqs) > 0) {
-    prefix := "@media " ++ String.concat(" and ", scope.mqs) ++ "{";
+    prefix := "@media " ++ String.concat(" and ", List.rev(scope.mqs)) ++ "{";
     suffix := suffix^ ++ "}";
   };
   if (List.length(scope.supps) > 0) {
     suffix := suffix^ ++ "}";
     prefix :=
-      prefix^ ++ "@supports " ++ String.concat(" and ", scope.supps) ++ "{";
+      prefix^
+      ++ "@supports "
+      ++ String.concat(" and ", List.rev(scope.supps))
+      ++ "{";
   };
   if (List.length(scope.selectors) > 0) {
     prefix := prefix^ ++ replace(joinSelectors(scope.selectors), hash);
@@ -1013,19 +1016,14 @@ let rec walk = (decls, idx, scope, acc) =>
         decls,
         idx + 1,
         scope,
-        walk(ruleset, 0, {...scope, mqs: List.concat([scope.mqs, [q]])}, acc)
+        walk(ruleset, 0, {...scope, mqs: [q, ...scope.mqs]}, acc)
       )
     | Supports(s, ruleset) =>
       walk(
         decls,
         idx + 1,
         scope,
-        walk(
-          ruleset,
-          0,
-          {...scope, supps: List.concat([scope.supps, [s]])},
-          acc
-        )
+        walk(ruleset, 0, {...scope, supps: [s, ...scope.supps]}, acc)
       )
     | Select(p, ruleset) =>
       walk(
