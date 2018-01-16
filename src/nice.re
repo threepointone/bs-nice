@@ -916,10 +916,11 @@ let string_of_style =
   | Select(_, _)
   | Supports(_, _) => raise(Not_found);
 
-/* at-rules handled before they get here */
-/* | _ => raise(Not_found); */
-
-let selectorTokenizer: Js.Re.t = [%bs.raw {|/[(),]|"(?:\\.|[^"\n])*"|'(?:\\.|[^'\n])*'|\/\*[\s\S]*?\*\//g |}];
+let selectorTokenizer: Js.Re.t =
+  Js.Re.fromStringWithFlags(
+    "[(),]|\"(?:\\\\.|[^\"\\n])*\"|'(?:\\\\.|[^'\\n])*'|\\/\\*[\\s\\S]*?\\*\\/",
+    ~flags="g"
+  );
 
 /* todo - rewrite in pure reason */
 let splitSelector: string => array(string) = [%bs.raw
@@ -950,25 +951,27 @@ let splitSelector: string => array(string) = [%bs.raw
 ];
 
 let replacementRegex = Js.Re.fromStringWithFlags("&", ~flags="g");
-let replace = (str, _with) => {
-  Js.String.replaceByRe(replacementRegex, str, _with);
-};
 
-let join_selectors = (a, b) => {
-  let ax =
-    splitSelector(a)
-    |> Array.map(a => String.contains(a, '&') ? a : "&" ++ a)
-    |> Array.to_list;
-  let bx =
-    splitSelector(b)
-    |> Array.map(b => String.contains(b, '&') ? b : "&" ++ b)
-    |> Array.to_list;
-  bx
-  |> List.fold_left(
-       (arr, b) => List.concat([arr, ax |> List.map(a => replace(b, a))]),
-       []
-     )
-  |> String.concat(",");
+let replace = (str, _with) =>
+  Js.String.replaceByRe(replacementRegex, str, _with);
+
+let joinSelectors = selectors => {
+  let rec joinSelectors = selectors =>
+    switch (selectors) {
+    | [] => ""
+    | [x] => x
+    | [x, y] => replace(x, y)
+    | [h, ...t] => replace(h, joinSelectors(t))
+    };
+  joinSelectors(
+    List.flatten(
+      List.map(selector => 
+               Array.to_list(splitSelector(selector))
+                 |> List.map(a => String.contains(a, '&') ? a : "&" ++ a), 
+               selectors
+              )
+    )
+  );
 };
 
 type scope = {
@@ -990,9 +993,7 @@ let string_of_scope = (scope: scope, hash: string, content: string) => {
       prefix^ ++ "@supports " ++ String.concat(" and ", scope.supps) ++ "{";
   };
   if (List.length(scope.selectors) > 0) {
-    prefix :=
-      prefix^
-      ++ replace(List.fold_left(join_selectors, "", scope.selectors), hash);
+    prefix := prefix^ ++ replace(joinSelectors(scope.selectors), hash);
   };
   prefix := prefix^ ++ "{";
   suffix := suffix^ ++ "}";
