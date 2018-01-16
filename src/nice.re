@@ -964,14 +964,12 @@ let joinSelectors = selectors => {
     | [h, ...t] => replace(h, joinSelectors(t))
     };
   joinSelectors(
-    List.rev(
-      List.flatten(
-        List.map(
-          selector =>
-            Array.to_list(splitSelector(selector))
-            |> List.map(a => String.contains(a, '&') ? a : "&" ++ a),
-          selectors
-        )
+    List.flatten(
+      List.map(
+        selector =>
+          Array.to_list(splitSelector(selector))
+          |> List.map(a => String.contains(a, '&') ? a : "&" ++ a),
+        selectors
       )
     )
   );
@@ -1034,12 +1032,7 @@ let rec walk = (decls, idx, scope, acc) =>
         decls,
         idx + 1,
         scope,
-        walk(
-          ruleset,
-          0,
-          {...scope, selectors: List.concat([scope.selectors, [p]])},
-          acc
-        )
+        walk(ruleset, 0, {...scope, selectors: [p, ...scope.selectors]}, acc)
       )
     | x => walk(decls, idx + 1, scope, [(scope, x), ...acc])
     };
