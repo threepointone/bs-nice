@@ -50,4 +50,8 @@ describe("Nice", () => {
     global("html, body", [Padding(Px(20))]);
     expect(serialized_global_cache()) |> toMatchSnapshot;
   });
+  test("splitSelector", () =>
+    expect(Nice.splitSelector(".a, span:hover, &:matches(h1, h2)"))
+    |> toEqual([|".a", " span:hover", " &:matches(h1, h2)"|])
+  );
 });

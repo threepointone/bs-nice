@@ -918,37 +918,42 @@ let string_of_style =
 
 /* at-rules handled before they get here */
 /* | _ => raise(Not_found); */
-let selectorTokenizer = [%bs.re
-  {|/[(),]|"(?:\\.|[^"\n])*"|'(?:\\.|[^'\n])*'|\/\*[\s\S]*?\*\//g|}
-];
+let split_on_char = (sep, s) => {
+  let r = ref([]);
+  let j = ref(String.length(s));
+  for (i in String.length(s) - 1 downto 0) {
+    if (String.unsafe_get(s, i) == sep) {
+      r := [String.sub(s, i + 1, j^ - i - 1), ...r^];
+      j := i;
+    };
+  };
+  [String.sub(s, 0, j^), ...r^];
+};
 
-/* todo - rewrite in pure reason */
-let splitSelector: string => array(string) = [%bs.raw
-  {|
-    function(selector) {
-      if(selector.indexOf(',') === -1) {
-        return [selector]
-      }
-
-      var indices = [], res = [], inParen = 0, o
-      /*eslint-disable no-cond-assign*/
-      while (o = selectorTokenizer.exec(selector)) {
-      /*eslint-enable no-cond-assign*/
-        switch (o[0]) {
-        case '(': inParen++; break
-        case ')': inParen--; break
-        case ',': if (inParen) break; indices.push(o.index)
-        }
-      }
-      for (o = indices.length; o--;){
-        res.unshift(selector.slice(indices[o] + 1))
-        selector = selector.slice(0, indices[o])
-      }
-      res.unshift(selector)
-      return res
-    }
-    |}
-];
+let splitSelector = selector => {
+  let selectorList = split_on_char(',', selector);
+  let withLeftParen =
+    List.filter(str => String.contains(str, '('), selectorList);
+  let withRightParen =
+    List.filter(str => String.contains(str, ')'), selectorList);
+  let withParens =
+    List.map2(
+      (left, right) => left ++ "," ++ right,
+      withLeftParen,
+      withRightParen
+    );
+  let withoutParens =
+    List.filter(
+      str => ! String.contains(str, '(') && ! String.contains(str, ')'),
+      selectorList
+    );
+  List.append(withoutParens, withParens)
+  |> Array.of_list
+  |> Array.fold_left(
+       (arr: array(string), str: string) => Array.append(arr, [|str|]),
+       [||]
+     );
+};
 
 let replace: (string, string) => string = [%bs.raw
   {|
