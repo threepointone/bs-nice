@@ -918,41 +918,27 @@ let string_of_style =
 
 /* at-rules handled before they get here */
 /* | _ => raise(Not_found); */
-let split_on_char = (sep, s) => {
-  let r = ref([]);
-  let j = ref(String.length(s));
-  for (i in String.length(s) - 1 downto 0) {
-    if (String.unsafe_get(s, i) == sep) {
-      r := [String.sub(s, i + 1, j^ - i - 1), ...r^];
-      j := i;
+let splitSelector = (selector: string) => {
+  let size = String.length(selector);
+  let rec explode = (start: int, length: int, depth: int, res: array(string)) => {
+    let index = start + length;
+    let isPastEnd = index >= size;
+    if (isPastEnd && length > 0) {
+      Array.append(res, [|String.sub(selector, start, length)|]);
+    } else if (isPastEnd) {
+      res;
+    } else {
+      switch (String.unsafe_get(selector, start + length), depth) {
+      | (',', 0) =>
+        let res = Array.append(res, [|String.sub(selector, start, length)|]);
+        explode(start + length + 1, 0, 0, res);
+      | ('(', _) => explode(start, length + 1, depth + 1, res)
+      | (')', _) => explode(start, length + 1, depth - 1, res) /* TODO: could throw on paren-mismatch here */
+      | _ => explode(start, length + 1, depth, res)
+      };
     };
   };
-  [String.sub(s, 0, j^), ...r^];
-};
-
-let splitSelector = selector => {
-  let selectorList = split_on_char(',', selector);
-  let withLeftParen =
-    List.filter(str => String.contains(str, '('), selectorList);
-  let withRightParen =
-    List.filter(str => String.contains(str, ')'), selectorList);
-  let withParens =
-    List.map2(
-      (left, right) => left ++ "," ++ right,
-      withLeftParen,
-      withRightParen
-    );
-  let withoutParens =
-    List.filter(
-      str => ! String.contains(str, '(') && ! String.contains(str, ')'),
-      selectorList
-    );
-  List.append(withoutParens, withParens)
-  |> Array.of_list
-  |> Array.fold_left(
-       (arr: array(string), str: string) => Array.append(arr, [|str|]),
-       [||]
-     );
+  explode(0, 0, 0, [||]);
 };
 
 let replace: (string, string) => string = [%bs.raw

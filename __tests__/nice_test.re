@@ -51,7 +51,7 @@ describe("Nice", () => {
     expect(serialized_global_cache()) |> toMatchSnapshot;
   });
   test("splitSelector", () =>
-    expect(Nice.splitSelector(".a, span:hover, &:matches(h1, h2)"))
-    |> toEqual([|".a", " span:hover", " &:matches(h1, h2)"|])
+    expect(Nice.splitSelector(".a, span:hover, &:matches(h1, h2, h3, h4)"))
+    |> toEqual([|".a", " span:hover", " &:matches(h1, h2, h3, h4)"|])
   );
 });
