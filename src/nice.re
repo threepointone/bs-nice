@@ -782,7 +782,7 @@ type style =
   | Initial(string)
   | Inherit(string)
   | Raw(string, string)
-and ruleset = list(style);
+and ruleset = array(style);
 
 let string_of_style =
   fun
@@ -916,11 +916,11 @@ let string_of_style =
   | Select(_, _)
   | Supports(_, _) => raise(Not_found);
 
-/* at-rules handled before they get here */
-/* | _ => raise(Not_found); */
-let selectorTokenizer = [%bs.re
-  {|/[(),]|"(?:\\.|[^"\n])*"|'(?:\\.|[^'\n])*'|\/\*[\s\S]*?\*\//g|}
-];
+let selectorTokenizer: Js.Re.t =
+  Js.Re.fromStringWithFlags(
+    "[(),]|\"(?:\\\\.|[^\"\\n])*\"|'(?:\\\\.|[^'\\n])*'|\\/\\*[\\s\\S]*?\\*\\/",
+    ~flags="g"
+  );
 
 /* todo - rewrite in pure reason */
 let splitSelector: string => array(string) = [%bs.raw
@@ -950,29 +950,29 @@ let splitSelector: string => array(string) = [%bs.raw
     |}
 ];
 
-let replace: (string, string) => string = [%bs.raw
-  {|
-  function(src, _with){
-    return src.replace(/\&/g, _with);
-  }
-  |}
-];
+let replacementRegex = Js.Re.fromStringWithFlags("&", ~flags="g");
 
-let join_selectors = (a, b) => {
-  let ax =
-    splitSelector(a)
-    |> Array.map(a => String.contains(a, '&') ? a : "&" ++ a)
-    |> Array.to_list;
-  let bx =
-    splitSelector(b)
-    |> Array.map(b => String.contains(b, '&') ? b : "&" ++ b)
-    |> Array.to_list;
-  bx
-  |> List.fold_left(
-       (arr, b) => List.concat([arr, ax |> List.map(a => replace(b, a))]),
-       []
-     )
-  |> String.concat(",");
+let replace = (str, _with) =>
+  Js.String.replaceByRe(replacementRegex, _with, str);
+
+let joinSelectors = selectors => {
+  let rec joinSelectors = selectors =>
+    switch selectors {
+    | [] => ""
+    | [x] => x
+    | [x, y] => replace(x, y)
+    | [h, ...t] => replace(h, joinSelectors(t))
+    };
+  joinSelectors(
+    List.flatten(
+      List.map(
+        selector =>
+          Array.to_list(splitSelector(selector))
+          |> List.map(a => String.contains(a, '&') ? a : "&" ++ a),
+        selectors
+      )
+    )
+  );
 };
 
 type scope = {
@@ -985,18 +985,19 @@ let string_of_scope = (scope: scope, hash: string, content: string) => {
   let prefix = ref("");
   let suffix = ref("");
   if (List.length(scope.mqs) > 0) {
-    prefix := "@media " ++ String.concat(" and ", scope.mqs) ++ "{";
+    prefix := "@media " ++ String.concat(" and ", List.rev(scope.mqs)) ++ "{";
     suffix := suffix^ ++ "}";
   };
   if (List.length(scope.supps) > 0) {
     suffix := suffix^ ++ "}";
     prefix :=
-      prefix^ ++ "@supports " ++ String.concat(" and ", scope.supps) ++ "{";
+      prefix^
+      ++ "@supports "
+      ++ String.concat(" and ", List.rev(scope.supps))
+      ++ "{";
   };
   if (List.length(scope.selectors) > 0) {
-    prefix :=
-      prefix^
-      ++ replace(List.fold_left(join_selectors, "", scope.selectors), hash);
+    prefix := prefix^ ++ replace(joinSelectors(scope.selectors), hash);
   };
   prefix := prefix^ ++ "{";
   suffix := suffix^ ++ "}";
@@ -1005,54 +1006,53 @@ let string_of_scope = (scope: scope, hash: string, content: string) => {
 
 let blankScope = {mqs: [], supps: [], selectors: ["&"]};
 
-let rec walk = (decls, scope) =>
-  List.fold_left(
-    (acc, style) =>
-      switch style {
-      | MediaQuery(q, ruleset) =>
-        List.concat([
-          acc,
-          walk(ruleset, {...scope, mqs: List.concat([scope.mqs, [q]])})
-        ])
-      | Supports(s, ruleset) =>
-        List.concat([
-          acc,
-          walk(ruleset, {...scope, supps: List.concat([scope.supps, [s]])})
-        ])
-      | Select(p, ruleset) =>
-        List.concat([
-          acc,
-          walk(
-            ruleset,
-            {...scope, selectors: List.concat([scope.selectors, [p]])}
-          )
-        ])
-      | x => List.concat([acc, [(scope, x)]])
-      },
-    [],
-    decls
-  );
+let rec walk = (decls, idx, scope, acc) =>
+  if (Array.length(decls) - idx == 0) {
+    acc;
+  } else {
+    switch decls[Array.length(decls) - idx - 1] {
+    | MediaQuery(q, ruleset) =>
+      walk(
+        decls,
+        idx + 1,
+        scope,
+        walk(ruleset, 0, {...scope, mqs: [q, ...scope.mqs]}, acc)
+      )
+    | Supports(s, ruleset) =>
+      walk(
+        decls,
+        idx + 1,
+        scope,
+        walk(ruleset, 0, {...scope, supps: [s, ...scope.supps]}, acc)
+      )
+    | Select(p, ruleset) =>
+      walk(
+        decls,
+        idx + 1,
+        scope,
+        walk(ruleset, 0, {...scope, selectors: [p, ...scope.selectors]}, acc)
+      )
+    | x => walk(decls, idx + 1, scope, [(scope, x), ...acc])
+    };
+  };
 
-type atom = (scope, ruleset);
+type atom = (scope, list(style));
 
-/* wtf is going on here */
-let group = (normalized: list((scope, style))) : list(atom) => {
-  let (rest, scope, styles) =
-    List.fold_left(
-      (
-        (rest: list(atom), lastScope: scope, styles: ruleset),
-        (scope: scope, style: style)
-      ) =>
-        lastScope === scope ?
-          (rest, scope, List.concat([styles, [style]])) :
-          (List.concat([rest, [(lastScope, styles)]]), scope, [style]),
-      ([], blankScope, []: ruleset),
-      normalized
-    );
-  List.concat([rest, [(scope, styles)]]);
-};
+let rec group = (normalized: list((scope, style))) : list(atom) =>
+  switch normalized {
+  | [] => []
+  | [(scope, style), ...t] =>
+    switch (group(t)) {
+    | [] => [(scope, [style])]
+    | [(lastScope, styles), ...t] when lastScope === scope => [
+        (lastScope, [style, ...styles]),
+        ...t
+      ]
+    | l => [(scope, [style]), ...l]
+    }
+  };
 
-let flatten = decls => group(walk(decls, blankScope));
+let flatten = decls => group(walk(decls, 0, blankScope, []));
 
 let global_cache = Hashtbl.create(100);
 
@@ -1065,26 +1065,56 @@ let flush = () => {
   Hashtbl.reset(rule_cache);
 };
 
+[@bs.val] external document : Dom.document = "document";
+
+[@bs.send]
+external querySelector : (Dom.document, string) => Js.Nullable.t(Dom.element) =
+  "querySelector";
+
+[@bs.send]
+external createElement : (Dom.document, string) => Dom.element =
+  "createElement";
+
+[@bs.send] external setAttribute : (Dom.element, string, string) => unit = "";
+
+[@bs.get] external head : Dom.document => Dom.element = "";
+
+[@bs.send] external appendChild : (Dom.element, Dom.element) => unit = "";
+
+[@bs.send]
+external insertCssRule : (Dom.cssStyleSheet, string, int) => unit =
+  "insertRule";
+
+[@bs.get] external sheet : Dom.element => Dom.cssStyleSheet = "";
+
+[@bs.get]
+external cssRules : Dom.cssStyleSheet => Dom.cssStyleDeclaration = "";
+
+[@bs.get] external length : Dom.cssStyleDeclaration => int = "";
+
+[@bs.send]
+external createTextNode : (Dom.document, string) => Dom.element = "";
+
+[@bs.scope "process.env"] [@bs.val] external node_env : string = "NODE_ENV";
+
 /* todo - server/node  */
 /* todo - server/native */
-let insertRule: string => unit = [%bs.raw
-  {|function(rule){
-    if(typeof window === "undefined"){
-      return
-    }
-      var tag = document.querySelector('style[data-nice]');
-      if(!tag){
-        tag = document.createElement('style');
-        tag.setAttribute('data-nice', '');
-        document.head.appendChild(tag);
-      }
-      if(process.env.NODE_ENV === 'production'){
-
-      } else {
-        tag.appendChild(document.createTextNode(rule));
-      }
-    }|}
-];
+let insertRule = rule => {
+  let tag =
+    switch (Js.Nullable.to_opt(querySelector(document, "style[data-nice]"))) {
+    | None =>
+      let tag = createElement(document, "style");
+      setAttribute(tag, "data-nice", "");
+      appendChild(document |> head, tag);
+      tag;
+    | Some(tag) => tag
+    };
+  if (node_env === "production") {
+    insertCssRule(tag |> sheet, rule, tag |> sheet |> cssRules |> length);
+  } else {
+    appendChild(tag, createTextNode(document, rule));
+  };
+};
 
 let alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
