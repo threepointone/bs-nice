@@ -7,12 +7,12 @@ css-in-reason. just because.
 ```reason
 open Nice;
 
-let className = css([
+let className = css([|
   Display(Flex),
   AlignItems(Center),
   Color(Red),
   Select(":hover", [Color(Blue)])
-]);
+|]);
 ```
 
 ## some nice features
