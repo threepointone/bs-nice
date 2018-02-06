@@ -377,7 +377,7 @@ type color =
 
 let string_of_color =
   fun
-  | RGB(r, g, b) => {j|rgba($(r),$(g),$(b)|j}
+  | RGB(r, g, b) => {j|rgb($(r),$(g),$(b))|j}
   | RGBa(r, g, b, a) => {j|rgba($(r),$(g),$(b),$(a))|j}
   | HSL(h, s, l) => {j|hsl($(h),$(s),$(l)|j}
   | HSLa(h, s, l, a) => {j|hsla($(h),$(s),$(l),$(a)|j}
