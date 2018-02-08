@@ -230,6 +230,7 @@ type color =
   | RGBa(int, int, int, float)
   | HSL(int, int, int)
   | HSLa(int, int, int, float)
+  | Hex(string)
   | Transparent
   | Aliceblue
   | Antiquewhite
@@ -383,6 +384,7 @@ let string_of_color =
   | RGBa(r, g, b, a) => {j|rgba($(r),$(g),$(b),$(a))|j}
   | HSL(h, s, l) => {j|hsl($(h),$(s),$(l)|j}
   | HSLa(h, s, l, a) => {j|hsla($(h),$(s),$(l),$(a)|j}
+  | Hex(x) => {j|#$(x)|j}
   | Transparent => "transparent"
   | Aliceblue => "aliceblue"
   | Antiquewhite => "antiquewhite"
