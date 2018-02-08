@@ -803,8 +803,8 @@ let string_of_style =
   | Right(dimension) => "right:" ++ string_of_dimension(dimension)
   | MinWidth(dimension) => "min-width:" ++ string_of_dimension(dimension)
   | MaxWidth(dimension) => "max-width:" ++ string_of_dimension(dimension)
-  | MinHeight(dimension) => "minheight:" ++ string_of_dimension(dimension)
-  | MaxHeight(dimension) => "maxheight:" ++ string_of_dimension(dimension)
+  | MinHeight(dimension) => "min-height:" ++ string_of_dimension(dimension)
+  | MaxHeight(dimension) => "max-height:" ++ string_of_dimension(dimension)
   | Margin(dimension) => "margin:" ++ string_of_dimension(dimension)
   | MarginVertical(dimension) =>
     "margin-vertical:" ++ string_of_dimension(dimension)
