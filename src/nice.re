@@ -156,7 +156,9 @@ type dimension =
   | Em(float)
   | Rem(float)
   | Percent(float)
-  | Calc(string);
+  | Calc(string)
+  | Vh(float)
+  | Vw(float);
 
 let string_of_dimension =
   fun
@@ -164,7 +166,9 @@ let string_of_dimension =
   | Em(x) => {j|$(x)em|j}
   | Rem(x) => {j|$(x)rem|j}
   | Percent(x) => {j|$(x)%|j}
-  | Calc(x) => "calc(" ++ x ++ ")";
+  | Calc(x) => "calc(" ++ x ++ ")"
+  | Vh(x) => {j|$(x)vh|j}
+  | Vw(x) => {j|$(x)vw|j};
 
 type flexBasis =
   | Auto
