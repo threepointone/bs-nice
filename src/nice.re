@@ -154,15 +154,21 @@ let string_of_display =
 type dimension =
   | Px(int)
   | Em(float)
+  | Rem(float)
   | Percent(float)
-  | Calc(string);
+  | Calc(string)
+  | Vh(float)
+  | Vw(float);
 
 let string_of_dimension =
   fun
   | Px(x) => {j|$(x)px|j}
   | Em(x) => {j|$(x)em|j}
+  | Rem(x) => {j|$(x)rem|j}
   | Percent(x) => {j|$(x)%|j}
-  | Calc(x) => "calc(" ++ x ++ ")";
+  | Calc(x) => "calc(" ++ x ++ ")"
+  | Vh(x) => {j|$(x)vh|j}
+  | Vw(x) => {j|$(x)vw|j};
 
 type flexBasis =
   | Auto
@@ -228,6 +234,7 @@ type color =
   | RGBa(int, int, int, float)
   | HSL(int, int, int)
   | HSLa(int, int, int, float)
+  | Hex(string)
   | Transparent
   | Aliceblue
   | Antiquewhite
@@ -381,6 +388,7 @@ let string_of_color =
   | RGBa(r, g, b, a) => {j|rgba($(r),$(g),$(b),$(a))|j}
   | HSL(h, s, l) => {j|hsl($(h),$(s),$(l)|j}
   | HSLa(h, s, l, a) => {j|hsla($(h),$(s),$(l),$(a)|j}
+  | Hex(x) => {j|#$(x)|j}
   | Transparent => "transparent"
   | Aliceblue => "aliceblue"
   | Antiquewhite => "antiquewhite"
@@ -795,8 +803,8 @@ let string_of_style =
   | Right(dimension) => "right:" ++ string_of_dimension(dimension)
   | MinWidth(dimension) => "min-width:" ++ string_of_dimension(dimension)
   | MaxWidth(dimension) => "max-width:" ++ string_of_dimension(dimension)
-  | MinHeight(dimension) => "minheight:" ++ string_of_dimension(dimension)
-  | MaxHeight(dimension) => "maxheight:" ++ string_of_dimension(dimension)
+  | MinHeight(dimension) => "min-height:" ++ string_of_dimension(dimension)
+  | MaxHeight(dimension) => "max-height:" ++ string_of_dimension(dimension)
   | Margin(dimension) => "margin:" ++ string_of_dimension(dimension)
   | MarginVertical(dimension) =>
     "margin-vertical:" ++ string_of_dimension(dimension)
