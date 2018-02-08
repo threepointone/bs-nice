@@ -154,6 +154,7 @@ let string_of_display =
 type dimension =
   | Px(int)
   | Em(float)
+  | Rem(float)
   | Percent(float)
   | Calc(string);
 
@@ -161,6 +162,7 @@ let string_of_dimension =
   fun
   | Px(x) => {j|$(x)px|j}
   | Em(x) => {j|$(x)em|j}
+  | Rem(x) => {j|$(x)rem|j}
   | Percent(x) => {j|$(x)%|j}
   | Calc(x) => "calc(" ++ x ++ ")";
 
